@@ -8,6 +8,19 @@ side by side. Never present a prepared result as a newly completed run.
 ## Before the customer arrives
 
 Complete [README setup](README.md#github-setup), including Copilot access and GitHub Pages.
+If you changed Copilot authentication or other workflow configuration after creating the
+fixtures, commit those changes on main and synchronize them first:
+
+```sh
+for branch in demo/pr-review demo/ci-failure demo/issue-fix; do
+  git switch "$branch"
+  git merge --no-edit main
+done
+git switch main
+```
+
+This brings workflow configuration into each fixture; it does not merge fixture defects
+into main. PR-triggered workflows must not retain the old authentication configuration.
 From this existing clone, authenticate and publish the prepared local history:
 
 ```sh

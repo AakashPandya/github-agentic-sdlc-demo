@@ -47,7 +47,9 @@ No remote push, labels, issues, PRs, agent inference run or Pages deployment occ
 GitHub CLI is signed out. Copilot license, centralized organization billing, repository
 Actions policy, PR-creation permission, Pages availability and token configuration cannot
 be established locally. All workflows configure the recommended Actions-token inference
-method. A personal repository may need the documented Copilot PAT fallback.
+method. The public GitHub account API confirms `AakashPandya` is a personal (`User`) owner;
+plan for the documented Copilot PAT fallback unless eligible organization billing is
+available. Neither inference method was exercised remotely.
 
 Agent findings and generated code cannot be promised in advance. The runbook provides
 scenarios and expected outcomes, not fabricated execution evidence. Optional CI-trigger

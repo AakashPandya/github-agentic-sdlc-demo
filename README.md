@@ -106,8 +106,9 @@ permissions:
 ```
 
 This selects the Actions token for inference. Official docs require an organization
-Copilot subscription with centralized billing. The remote here is under `AakashPandya`;
-account eligibility and organization billing cannot be verified while `gh` is signed out.
+Copilot subscription with centralized billing. The remote here is under `AakashPandya`; the public GitHub API identifies this owner as
+a personal (`User`) account. Plan to use the fallback below unless eligible organization
+billing is available. License and inference access cannot be verified while `gh` is signed out.
 **The recommended method is configured, but runtime access is unverified.**
 
 For a personal repository or unavailable centralized billing, use the supported fallback:
@@ -119,7 +120,9 @@ For a personal repository or unavailable centralized billing, use the supported 
 3. Store it directly in repository **Settings → Secrets and variables → Actions →
    Secrets → New repository secret**, named `COPILOT_GITHUB_TOKEN`.
 4. Run `gh aw compile`, `gh aw validate --strict`, commit the source and lock changes,
-   and push. Leave `engine: copilot` unchanged.
+   and push. Leave `engine: copilot` unchanged. Merge the updated main into each demo
+   branch before opening its PR, so PR-triggered workflows use the same auth configuration
+   (commands in DEMO.md).
 
 Merely adding the fallback secret while keeping `copilot-requests: write` does not
 switch authentication: that secret is ignored for inference when the permission exists.
