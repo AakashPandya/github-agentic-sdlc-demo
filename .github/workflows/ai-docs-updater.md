@@ -52,4 +52,3 @@ story. Do not invent features or execution results. If already accurate, use noo
 All other protected files remain blocked. Never edit .github/**, instructions,
 application code or dependencies. No need to run or install application code for
 this documentation comparison; inspect source text.
-

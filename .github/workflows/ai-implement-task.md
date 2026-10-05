@@ -69,4 +69,3 @@ pre-existing failures. Do not weaken tests to make checks pass. Use create-pull-
 for one draft PR; no direct remote git writes. Include requirement, implementation
 summary, files changed, tests added/changed, actual validation results and points
 needing human review in the PR body. A PR is a proposal requiring human review.
-

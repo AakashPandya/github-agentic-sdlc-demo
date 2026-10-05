@@ -56,4 +56,3 @@ create at most one issue with a link to the run, failed SHA, and the following:
 Distinguish observed facts from hypotheses. If logs are inaccessible say so and lower
 confidence; never fabricate log lines. Do not modify source code. CI detects failure;
 Copilot investigates why it failed.
-

@@ -50,4 +50,3 @@ Status: READY / READY WITH CAUTION / NOT READY
 
 State what a human must verify. This report is advisory. Do not deploy, merge,
 create a release, change labels or modify application code.
-

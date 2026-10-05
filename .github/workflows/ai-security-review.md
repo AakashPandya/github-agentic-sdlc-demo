@@ -53,4 +53,3 @@ paths/lines and explain the input-to-sink path, impact and recommended fix. Trea
 ordinary task persistence as intentional, not automatically a vulnerability. Never
 invent an exploit, publish secret values, or include malicious payloads. Redact any
 sensitive evidence. Do not execute untrusted code, modify source, or automatically approve.
-

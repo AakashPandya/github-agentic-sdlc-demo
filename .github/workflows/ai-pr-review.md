@@ -55,4 +55,3 @@ Risk: Low / Medium / High
 
 Use COMMENT for a clean/informational review; REQUEST_CHANGES for demonstrated
 blocking defects. A passing CI run does not prove semantic correctness.
-
