@@ -53,3 +53,16 @@ Agent findings and generated code cannot be promised in advance. The runbook pro
 scenarios and expected outcomes, not fabricated execution evidence. Optional CI-trigger
 PAT configuration is independent of Copilot authentication. gh-aw remains preview tooling;
 compilation does not prove a GitHub-hosted execution will succeed under account policies.
+
+## Isolated demo branches
+
+| Branch | Lint | Tests | Build | Intended behavior |
+|---|---|---|---|---|
+| `main` | Pass | 19 pass | Pass | Correct application |
+| `demo/pr-review` | Pass | 19 pass | Pass | Whitespace-only edits, unsafe HTML rendering and missing-ID replacement edge case, without new edge-case tests |
+| `demo/ci-failure` | Pass | 19 pass, exactly 1 fails | Pass | One incorrect assertion: expected remaining count 2, actual 1 |
+| `demo/issue-fix` | Pass | 17 pass | Pass | Isolated blank-creation regression with two whitespace cases deliberately absent; Copilot should restore validation and regression tests |
+
+These are local committed branches. The checkout is returned to main. The extra
+issue-fix branch resolves the conflict between a correct main application and a
+real bug for the issue-fixer demonstration; no broken fixture was merged into main.
