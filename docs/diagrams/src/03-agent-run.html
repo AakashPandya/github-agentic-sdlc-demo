@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Inside one agent run</title>
+    <link rel="stylesheet" href="diagram.css" />
+    <style>
+      .cred {
+        position: absolute;
+        top: 755px;
+        width: 355px;
+        height: 155px;
+      }
+      .cred .title {
+        font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+        font-size: 14.5px;
+      }
+      .footnote {
+        position: absolute;
+        left: 40px;
+        right: 40px;
+        bottom: 26px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas">
+      <div class="header">
+        <div class="kicker">GitHub Agentic SDLC demo · workflow 2 of 3</div>
+        <h1>Inside one agent run</h1>
+        <p class="subtitle">Reasoning and writing run in separate jobs. The model never holds a write token.</p>
+      </div>
+
+      <div id="openai" class="box model" style="left: 539px; top: 165px; width: 330px; height: 80px; gap: 3px">
+        <div class="title">OpenAI API</div>
+        <div class="sub"><span class="mono">openai/gpt-5.4-mini</span> · reasoning effort low</div>
+      </div>
+
+      <!-- 1 -->
+      <div id="trigger" class="box repo" style="left: 40px; top: 350px; width: 190px; height: 260px">
+        <div class="title-row"><span class="step">1</span><div class="title">GitHub event</div></div>
+        <div class="row" style="margin-top: 4px">
+          <span class="chip mono">issues: opened</span>
+          <span class="chip mono">pull_request</span>
+          <span class="chip mono">label: ai-fix</span>
+          <span class="chip mono">workflow_run</span>
+          <span class="chip mono">workflow_dispatch</span>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div id="activation" class="box repo" style="left: 272px; top: 330px; width: 200px; height: 300px">
+        <div class="title-row"><span class="step">2</span><div class="title">Activation</div></div>
+        <div class="row"><span class="chip mono">pre_activation</span><span class="chip mono">activation</span></div>
+        <ul style="margin-top: 4px">
+          <li>Checks the actor’s role (ai-fix needs write access)</li>
+          <li>Validates the lock file and API key secret</li>
+          <li>Builds the prompt with sanitized event text</li>
+        </ul>
+        <div class="out" style="color: var(--muted)">→ prompt</div>
+      </div>
+
+      <!-- 3 -->
+      <div class="region agent dashed" style="left: 502px; top: 290px; width: 404px; height: 378px">
+        <div class="region-title" style="left: auto; right: 18px; font-size: 12px">Sandbox · network firewall</div>
+      </div>
+      <div id="agent" class="box agent" style="left: 514px; top: 322px; width: 380px; height: 334px">
+        <div class="title-row"><span class="step">3</span><div class="title">Agent job</div><span class="chip mono">agent</span></div>
+        <div class="sub">Codex investigates the repository and drafts its answer.</div>
+        <ul>
+          <li>Codex CLI, 20 turns (40 for builders)</li>
+          <li>GitHub MCP read tools for issues, PRs, runs and source</li>
+          <li>Builders only: local checkout, shell, edit, Node 24</li>
+          <li>Network allowlist: defaults, GitHub, Codex (+ Node for builders)</li>
+        </ul>
+        <div class="row">
+          <span class="chip">read-only <span class="mono">GITHUB_TOKEN</span></span>
+          <span class="chip">no write permissions</span>
+        </div>
+        <div class="out">→ safe-output request: structured JSON + patch</div>
+      </div>
+
+      <!-- 4 -->
+      <div id="detect" class="box guard" style="left: 936px; top: 340px; width: 180px; height: 280px">
+        <div class="title-row"><span class="step">4</span><div class="title">Threat detection</div></div>
+        <div class="row"><span class="chip mono">detection</span></div>
+        <div class="sub">A separate Codex pass checks the request and patch for prompt injection, leaked secrets and malicious code.</div>
+        <div class="out">→ pass or block</div>
+      </div>
+
+      <!-- 5 -->
+      <div id="safe" class="box guard" style="left: 1158px; top: 322px; width: 230px; height: 334px">
+        <div class="title-row"><span class="step">5</span><div class="title">Safe outputs</div></div>
+        <div class="row"><span class="chip mono">safe_outputs</span></div>
+        <ul>
+          <li>Only job that publishes agent output</li>
+          <li>Maximum count per output type</li>
+          <li>Allowed files: <span class="mono">src/**</span>, <span class="mono">tests/**</span> or <span class="mono">README.md</span></li>
+          <li>Protected files blocked</li>
+          <li>PRs are drafts on <span class="mono">codex/**</span></li>
+          <li>No approve, merge or deploy</li>
+        </ul>
+        <div class="out">→ write to GitHub</div>
+      </div>
+
+      <!-- 6 -->
+      <div id="result" class="box human" style="left: 1430px; top: 370px; width: 130px; height: 220px">
+        <div class="title-row"><span class="step">6</span></div>
+        <div class="title">Human review</div>
+        <div class="sub">Comment, labels, issue or draft PR. A person decides.</div>
+      </div>
+
+      <!-- Credentials -->
+      <div class="region repo" style="left: 40px; top: 712px; width: 1520px; height: 218px">
+        <div class="region-title">Who holds which credential</div>
+      </div>
+      <div class="cred box model" style="left: 60px">
+        <div class="title">OPENAI_API_KEY</div>
+        <div class="sub">Actions secret. Authorizes model inference for the agent and detection jobs. Grants no GitHub access.</div>
+        <div class="row" style="margin-top: auto"><span class="chip">jobs 3 and 4</span></div>
+      </div>
+      <div class="cred box agent" style="left: 435px">
+        <div class="title">GITHUB_TOKEN · agent job</div>
+        <div class="sub">Read-only: contents plus the issue, pull request and Actions reads each agent declares.</div>
+        <div class="row" style="margin-top: auto"><span class="chip">job 3</span></div>
+      </div>
+      <div class="cred box guard" style="left: 810px">
+        <div class="title">GITHUB_TOKEN · safe outputs</div>
+        <div class="sub">Scoped write for the declared outputs only: comments, labels, issues, review and draft PR branch.</div>
+        <div class="row" style="margin-top: auto"><span class="chip">job 5</span></div>
+      </div>
+      <div class="cred box repo" style="left: 1185px">
+        <div class="title">GH_AW_CI_TRIGGER_TOKEN</div>
+        <div class="sub">Optional fine-grained PAT, this repository only. Pushes an empty commit so CI runs on agent PRs.</div>
+        <div class="row" style="margin-top: auto"><span class="chip">job 5 · optional</span></div>
+      </div>
+
+      <div class="footnote">
+        Job names match the compiled <span class="mono">*.lock.yml</span>:
+        <span class="mono">pre_activation → activation → agent → detection → safe_outputs → conclusion</span>.
+        The conclusion job reports run status only.
+      </div>
+
+      <!-- Connectors -->
+      <i data-wire data-from="trigger:r" data-to="activation:l" data-route="h" data-tone="repo"></i>
+      <i data-wire data-from="activation:r" data-to="agent:l" data-route="h" data-tone="repo"></i>
+      <i data-wire data-from="agent:r" data-to="detect:l" data-route="h" data-tone="agent"></i>
+      <i data-wire data-from="detect:r" data-to="safe:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="safe:r" data-to="result:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="openai:b:0.215" data-to="agent:t:0.2526" data-route="v" data-tone="model" data-both data-label="inference" data-label-at="0.3"></i>
+      <i data-wire data-from="detect:t" data-to="openai:r" data-route="vh" data-tone="model" data-dash data-label="inference" data-label-at="0.7"></i>
+    </div>
+    <script src="diagram.js"></script>
+  </body>
+</html>

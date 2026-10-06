@@ -171,6 +171,7 @@ Enterprise Server compatibility is not asserted by the local checks.
 
 ## Demo and audit documents
 
+- [Diagrams](docs/DIAGRAMS.md): PNG architecture and agent workflow diagrams for presentations.
 - [DEMO.md](DEMO.md): customer sequence, exact task input and branch/PR commands.
 - [DEMO-ISSUES.md](DEMO-ISSUES.md): copy-ready issue bodies.
 - [Organization setup](docs/ORG-SETUP.md): move to another machine and use your API key.

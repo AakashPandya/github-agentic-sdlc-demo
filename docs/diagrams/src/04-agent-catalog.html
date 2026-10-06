@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Agent catalog</title>
+    <link rel="stylesheet" href="diagram.css" />
+    <style>
+      .col-head {
+        position: absolute;
+        top: 160px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      .cell {
+        height: 68px;
+        padding: 10px 16px;
+        gap: 2px;
+        justify-content: center;
+      }
+      .cell .title {
+        font-size: 14.5px;
+      }
+      .cell .sub {
+        font-size: 12.5px;
+        line-height: 1.35;
+      }
+      .trigger {
+        left: 60px;
+        width: 320px;
+      }
+      .trigger .sub {
+        font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+        font-size: 12px;
+      }
+      .agent-cell {
+        left: 440px;
+        width: 500px;
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+      }
+      .agent-cell .title {
+        flex: none;
+        width: 170px;
+        font-size: 16px;
+      }
+      .agent-cell .sub {
+        color: var(--ink);
+      }
+      .output {
+        left: 1000px;
+        width: 540px;
+      }
+      .footnote {
+        position: absolute;
+        left: 40px;
+        right: 40px;
+        bottom: 26px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .footnote strong {
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas">
+      <div class="header">
+        <div class="kicker">GitHub Agentic SDLC demo · workflow 3 of 3</div>
+        <h1>The eight agents at a glance</h1>
+        <p class="subtitle">
+          Trigger → agent → bounded output. Investigators only read; builders edit a local checkout but can publish only a draft PR.
+        </p>
+      </div>
+
+      <div class="col-head" style="left: 60px">Trigger</div>
+      <div class="col-head" style="left: 440px">Agent and what it does</div>
+      <div class="col-head" style="left: 1000px">Bounded output (safe-output limits)</div>
+
+      <!-- Investigators -->
+      <div class="region agent" style="left: 30px; top: 188px; width: 1540px; height: 438px">
+        <div class="region-title">Investigate and report</div>
+        <div class="region-note">read-only token · no checkout · no shell · 20 turns</div>
+      </div>
+
+      <div id="t1" class="box cell repo trigger" style="top: 228px">
+        <div class="title">PR opened, reopened or updated</div>
+        <div class="sub">pull_request</div>
+      </div>
+      <div id="a1" class="box cell agent agent-cell" style="top: 228px">
+        <div class="title">PR Reviewer</div>
+        <div class="sub">Finds functional defects, state bugs and test gaps in the diff</div>
+      </div>
+      <div id="o1" class="box cell guard output" style="top: 228px">
+        <div class="title">Up to 5 inline comments + 1 review</div>
+        <div class="sub">COMMENT or REQUEST_CHANGES, never APPROVE</div>
+      </div>
+
+      <div id="t2" class="box cell repo trigger" style="top: 306px">
+        <div class="title">PR events, or a manual run</div>
+        <div class="sub">pull_request · workflow_dispatch</div>
+      </div>
+      <div id="a2" class="box cell agent agent-cell" style="top: 306px">
+        <div class="title">Security Review</div>
+        <div class="sub">Traces untrusted input to unsafe sinks; reports only evidenced risks</div>
+      </div>
+      <div id="o2" class="box cell guard output" style="top: 306px">
+        <div class="title">Up to 5 inline comments + 1 review, or 1 issue</div>
+        <div class="sub">An issue is opened only for a serious finding on a manual scan</div>
+      </div>
+
+      <div id="t3" class="box cell repo trigger" style="top: 384px">
+        <div class="title">New issue from any reporter</div>
+        <div class="sub">issues: opened</div>
+      </div>
+      <div id="a3" class="box cell agent agent-cell" style="top: 384px">
+        <div class="title">Issue Triage</div>
+        <div class="sub">Classifies the report, sets priority, links duplicates, asks for details</div>
+      </div>
+      <div id="o3" class="box cell guard output" style="top: 384px">
+        <div class="title">1 label call (up to 3 allowlisted labels) + 1 comment</div>
+        <div class="sub">Cannot apply ai-fix or close the issue</div>
+      </div>
+
+      <div id="t4" class="box cell repo trigger" style="top: 462px">
+        <div class="title">CI failed or timed out</div>
+        <div class="sub">workflow_run · main, demo/**, codex/**</div>
+      </div>
+      <div id="a4" class="box cell agent agent-cell" style="top: 462px">
+        <div class="title">CI Investigator</div>
+        <div class="sub">Reads failed logs at the exact SHA and finds the first causal failure</div>
+      </div>
+      <div id="o4" class="box cell guard output" style="top: 462px">
+        <div class="title">1 diagnosis issue</div>
+        <div class="sub">Failed stage, likely root cause, evidence, recommended fix, confidence</div>
+      </div>
+
+      <div id="t5" class="box cell human trigger" style="top: 540px">
+        <div class="title">Manual run</div>
+        <div class="sub">workflow_dispatch</div>
+      </div>
+      <div id="a5" class="box cell agent agent-cell" style="top: 540px">
+        <div class="title">Release Readiness</div>
+        <div class="sub">Checks CI on the current main SHA, open blockers, tests and docs</div>
+      </div>
+      <div id="o5" class="box cell guard output" style="top: 540px">
+        <div class="title">1 advisory issue</div>
+        <div class="sub">READY, READY WITH CAUTION or NOT READY; never deploys</div>
+      </div>
+
+      <!-- Builders -->
+      <div class="region agent" style="left: 30px; top: 642px; width: 1540px; height: 290px">
+        <div class="region-title">Change and propose</div>
+        <div class="region-note">local checkout · shell and edit · draft PR only · 40 turns (docs: 20)</div>
+      </div>
+
+      <div id="t6" class="box cell human trigger" style="top: 682px">
+        <div class="title">Maintainer applies the ai-fix label</div>
+        <div class="sub">label_command: ai-fix</div>
+      </div>
+      <div id="a6" class="box cell agent agent-cell" style="top: 682px">
+        <div class="title">Issue Fixer</div>
+        <div class="sub">Reproduces the bug, makes a minimal fix, adds tests, runs checks</div>
+      </div>
+      <div id="o6" class="box cell guard output" style="top: 682px">
+        <div class="title">1 draft PR, or 1 comment</div>
+        <div class="sub">src/** and tests/** only · up to 20 files, 256 KB · protected files blocked</div>
+      </div>
+
+      <div id="t7" class="box cell human trigger" style="top: 760px">
+        <div class="title">Manual run with a written requirement</div>
+        <div class="sub">workflow_dispatch · task</div>
+      </div>
+      <div id="a7" class="box cell agent agent-cell" style="top: 760px">
+        <div class="title">Implement Task</div>
+        <div class="sub">Implements the requirement with tests and validates it locally</div>
+      </div>
+      <div id="o7" class="box cell guard output" style="top: 760px">
+        <div class="title">1 draft PR</div>
+        <div class="sub">src/** and tests/** only · up to 20 files, 256 KB · protected files blocked</div>
+      </div>
+
+      <div id="t8" class="box cell human trigger" style="top: 838px">
+        <div class="title">Manual run</div>
+        <div class="sub">workflow_dispatch</div>
+      </div>
+      <div id="a8" class="box cell agent agent-cell" style="top: 838px">
+        <div class="title">Documentation Updater</div>
+        <div class="sub">Compares README.md with the code and corrects material drift</div>
+      </div>
+      <div id="o8" class="box cell guard output" style="top: 838px">
+        <div class="title">1 draft PR</div>
+        <div class="sub">README.md only · 1 file, 64 KB · no PR when the README is current</div>
+      </div>
+
+      <div class="footnote">
+        <strong>All eight:</strong> engine <span class="mono">codex</span> · model <span class="mono">openai/gpt-5.4-mini</span> ·
+        reasoning effort low · threat detection on · no approve, merge or deploy output. Green triggers are started by a person.
+      </div>
+
+      <!-- Connectors -->
+      <i data-wire data-from="t1:r" data-to="a1:l" data-route="h" data-tone="repo"></i>
+      <i data-wire data-from="a1:r" data-to="o1:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="t2:r" data-to="a2:l" data-route="h" data-tone="repo"></i>
+      <i data-wire data-from="a2:r" data-to="o2:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="t3:r" data-to="a3:l" data-route="h" data-tone="repo"></i>
+      <i data-wire data-from="a3:r" data-to="o3:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="t4:r" data-to="a4:l" data-route="h" data-tone="repo"></i>
+      <i data-wire data-from="a4:r" data-to="o4:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="t5:r" data-to="a5:l" data-route="h" data-tone="human"></i>
+      <i data-wire data-from="a5:r" data-to="o5:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="t6:r" data-to="a6:l" data-route="h" data-tone="human"></i>
+      <i data-wire data-from="a6:r" data-to="o6:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="t7:r" data-to="a7:l" data-route="h" data-tone="human"></i>
+      <i data-wire data-from="a7:r" data-to="o7:l" data-route="h" data-tone="guard"></i>
+      <i data-wire data-from="t8:r" data-to="a8:l" data-route="h" data-tone="human"></i>
+      <i data-wire data-from="a8:r" data-to="o8:l" data-route="h" data-tone="guard"></i>
+    </div>
+    <script src="diagram.js"></script>
+  </body>
+</html>

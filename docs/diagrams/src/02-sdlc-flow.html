@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Agents across the SDLC</title>
+    <link rel="stylesheet" href="diagram.css" />
+    <style>
+      .stage {
+        position: absolute;
+        top: 142px;
+        transform: translateX(-50%);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .stage .n {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: var(--paper);
+        font-size: 12px;
+      }
+      .lane-label {
+        position: absolute;
+        left: 48px;
+        width: 150px;
+        transform: translateY(-50%);
+      }
+      .lane-label .name {
+        font-size: 17px;
+        font-weight: 750;
+      }
+      .lane-label .desc {
+        margin-top: 4px;
+        font-size: 12.5px;
+        line-height: 1.4;
+        color: var(--muted);
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 9px 11px;
+        border: 1px solid #d8b9ff;
+        border-radius: 9px;
+        background: var(--paper);
+      }
+      .card .name {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: var(--agent);
+      }
+      .empty {
+        position: absolute;
+        font-size: 12.5px;
+        font-style: italic;
+        color: var(--faint);
+        transform: translate(-50%, -50%);
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas">
+      <div class="header">
+        <div class="kicker">GitHub Agentic SDLC demo · workflow 1 of 3</div>
+        <h1>Where each agent fits in the delivery lifecycle</h1>
+        <p class="subtitle">
+          Each agent starts from a normal GitHub event, does one job and hands the result to a person.
+          Actions stays the deterministic gate.
+        </p>
+      </div>
+
+      <!-- Stage headers -->
+      <div class="stage" style="left: 310px"><span class="n">1</span>Plan</div>
+      <div class="stage" style="left: 585px"><span class="n">2</span>Build</div>
+      <div class="stage" style="left: 910px"><span class="n">3</span>Review and test</div>
+      <div class="stage" style="left: 1255px"><span class="n">4</span>Release</div>
+      <div class="stage" style="left: 1475px"><span class="n">5</span>Maintain</div>
+
+      <!-- Lanes -->
+      <div class="region human" style="left: 30px; top: 180px; width: 1550px; height: 165px"></div>
+      <div class="region agent" style="left: 30px; top: 360px; width: 1550px; height: 400px"></div>
+      <div class="region actions" style="left: 30px; top: 775px; width: 1550px; height: 150px"></div>
+
+      <div class="lane-label" style="top: 262px">
+        <div class="name" style="color: var(--human)">People</div>
+        <div class="desc">Decide what to automate, review results, merge</div>
+      </div>
+      <div class="lane-label" style="top: 560px">
+        <div class="name" style="color: var(--agent)">gh-aw agents</div>
+        <div class="desc">OpenAI Codex reasoning with bounded safe outputs</div>
+      </div>
+      <div class="lane-label" style="top: 850px">
+        <div class="name" style="color: var(--actions)">GitHub Actions</div>
+        <div class="desc">Deterministic checks and deployment</div>
+      </div>
+
+      <!-- People lane -->
+      <div id="p-plan" class="box human" style="left: 220px; top: 200px; width: 180px; height: 125px">
+        <div class="title">Open an issue</div>
+        <div class="sub">Bug report or feature request, from any reporter</div>
+      </div>
+      <div id="p-build" class="box human" style="left: 480px; top: 200px; width: 210px; height: 125px">
+        <div class="title">Choose what to automate</div>
+        <div class="sub">Apply the <span class="mono">ai-fix</span> label, or dispatch a written task</div>
+      </div>
+      <div id="p-review" class="box human" style="left: 750px; top: 200px; width: 320px; height: 125px">
+        <div class="title">Review the draft PR</div>
+        <div class="sub">Read agent findings and CI results, then change, merge or close. Rulesets require this step.</div>
+      </div>
+      <div id="p-release" class="box human" style="left: 1170px; top: 200px; width: 170px; height: 125px">
+        <div class="title">Decide on release</div>
+        <div class="sub">Read the advisory and check the live site</div>
+      </div>
+      <div id="p-maintain" class="box human" style="left: 1390px; top: 200px; width: 170px; height: 125px">
+        <div class="title">Review README PR</div>
+        <div class="sub">Merge or close the documentation fix</div>
+      </div>
+
+      <!-- Agent lane -->
+      <div id="a-triage" class="box agent" style="left: 220px; top: 425px; width: 180px; height: 240px">
+        <div class="title">Issue Triage</div>
+        <div class="row"><span class="chip mono">issues: opened</span></div>
+        <div class="sub">Classifies the report, estimates priority, links likely duplicates and asks for missing details.</div>
+        <div class="out">→ up to 3 labels, 1 comment</div>
+      </div>
+
+      <div id="a-build" class="box agent" style="left: 480px; top: 395px; width: 210px; height: 330px; gap: 10px">
+        <div id="a-fixer" class="card">
+          <div class="name">Issue Fixer</div>
+          <div class="row"><span class="chip mono">label: ai-fix</span></div>
+          <div class="sub">Reproduces the bug, fixes it, adds tests</div>
+        </div>
+        <div id="a-impl" class="card">
+          <div class="name">Implement Task</div>
+          <div class="row"><span class="chip mono">workflow_dispatch</span></div>
+          <div class="sub">Builds the requirement with tests</div>
+        </div>
+        <div class="out">→ 1 draft PR on <span class="mono">codex/**</span></div>
+      </div>
+
+      <div id="a-pr" class="box agent" style="left: 750px; top: 385px; width: 150px; height: 170px">
+        <div class="title">PR Reviewer</div>
+        <div class="sub">Defects and test gaps</div>
+        <div class="out">→ up to 5 comments, 1 review</div>
+      </div>
+      <div id="a-sec" class="box agent" style="left: 920px; top: 385px; width: 150px; height: 170px">
+        <div class="title">Security Review</div>
+        <div class="sub">Input-to-sink risks</div>
+        <div class="out">→ review, or 1 issue</div>
+      </div>
+      <div id="a-ci" class="box agent" style="left: 750px; top: 575px; width: 320px; height: 160px">
+        <div class="title">CI Investigator</div>
+        <div class="sub">Reads failed job logs at the exact SHA and finds the first causal failure.</div>
+        <div class="out">→ 1 diagnosis issue: stage, root cause, evidence, fix, confidence</div>
+      </div>
+
+      <div id="a-release" class="box agent" style="left: 1170px; top: 405px; width: 170px; height: 300px">
+        <div class="title">Release Readiness</div>
+        <div class="row"><span class="chip mono">manual</span></div>
+        <div class="sub">Checks CI on the current main SHA, open blockers, tests and docs.</div>
+        <div class="out">→ 1 advisory issue: READY, CAUTION or NOT READY</div>
+      </div>
+
+      <div id="a-docs" class="box agent" style="left: 1390px; top: 405px; width: 170px; height: 300px">
+        <div class="title">Documentation Updater</div>
+        <div class="row"><span class="chip mono">manual</span></div>
+        <div class="sub">Compares README.md with the code, scripts and workflows.</div>
+        <div class="out">→ 1 draft PR, README.md only</div>
+      </div>
+
+      <!-- Actions lane -->
+      <div class="empty" style="left: 310px; top: 850px">no deterministic step</div>
+      <div id="x-ci" class="box actions" style="left: 750px; top: 795px; width: 320px; height: 110px">
+        <div class="title">CI · <span class="mono">ci.yml</span></div>
+        <div class="sub">Every PR and every push to main</div>
+        <div class="row">
+          <span class="chip">policy check</span><span class="chip">lint</span><span class="chip">test</span><span class="chip">build</span>
+        </div>
+      </div>
+      <div id="x-deploy" class="box actions" style="left: 1170px; top: 795px; width: 170px; height: 110px">
+        <div class="title">Deploy</div>
+        <div class="sub">Push to main: re-check, build, upload artifact</div>
+      </div>
+      <div id="x-pages" class="box actions" style="left: 1390px; top: 795px; width: 170px; height: 110px">
+        <div class="title">GitHub Pages</div>
+        <div class="sub">Live To-Do app</div>
+      </div>
+
+      <!-- Connectors -->
+      <i data-wire data-from="p-plan:b" data-to="a-triage:t" data-route="v" data-tone="agent" data-label="issue opened"></i>
+      <i data-wire data-from="a-triage:r:0.5" data-to="p-build:l:0.5" data-route="hvh" data-via="440" data-tone="agent" data-label="labels +<br>comment"></i>
+      <i data-wire data-from="p-build:b" data-to="a-build:t" data-route="v" data-tone="human" data-label="ai-fix · dispatch"></i>
+      <i data-wire data-from="a-build:r:0.227" data-to="a-pr:l" data-route="h" data-tone="agent" data-label="draft PR" data-label-dy="-14"></i>
+      <i data-wire data-from="a-build:b" data-to="x-ci:l" data-route="vh" data-tone="actions" data-label="PR runs CI" data-label-at="0.72"></i>
+      <i data-wire data-from="a-pr:t" data-to="p-review:b:0.234" data-route="v" data-tone="agent" data-label="findings"></i>
+      <i data-wire data-from="a-sec:t" data-to="p-review:b:0.766" data-route="v" data-tone="agent" data-label="findings"></i>
+      <i data-wire data-from="x-ci:t" data-to="a-ci:b" data-route="v" data-tone="fail" data-dash data-label="failure or timeout"></i>
+      <i data-wire data-from="p-review:r:0.5" data-to="x-deploy:l" data-route="hvh" data-via="1120" data-tone="human" data-label="merge<br>to main" data-label-at="0.45"></i>
+      <i data-wire data-from="p-release:b:0.3" data-to="a-release:t:0.3" data-route="v" data-tone="human" data-label="run"></i>
+      <i data-wire data-from="a-release:t:0.72" data-to="p-release:b:0.72" data-route="v" data-tone="agent" data-label="advisory"></i>
+      <i data-wire data-from="p-maintain:b:0.3" data-to="a-docs:t:0.3" data-route="v" data-tone="human" data-label="run"></i>
+      <i data-wire data-from="a-docs:t:0.72" data-to="p-maintain:b:0.72" data-route="v" data-tone="agent" data-label="PR"></i>
+      <i data-wire data-from="x-deploy:r" data-to="x-pages:l" data-route="h" data-tone="actions"></i>
+
+      <div class="legend">
+        <span class="key"><span class="swatch" style="border-color: var(--human); background: var(--human-soft)"></span>Person</span>
+        <span class="key"><span class="swatch" style="border-color: var(--agent); background: var(--agent-soft)"></span>gh-aw agent (Codex)</span>
+        <span class="key"><span class="swatch" style="border-color: var(--actions); background: var(--actions-soft)"></span>GitHub Actions</span>
+        <span class="key"><span class="line dash" style="border-color: var(--fail)"></span>Failure path</span>
+        <span class="spacer"></span>
+        <span><strong>No agent can approve, merge or deploy.</strong> Every change goes through a person.</span>
+      </div>
+    </div>
+    <script src="diagram.js"></script>
+  </body>
+</html>

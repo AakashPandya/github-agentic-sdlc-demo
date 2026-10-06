@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Component architecture</title>
+    <link rel="stylesheet" href="diagram.css" />
+  </head>
+  <body>
+    <div class="canvas">
+      <div class="header">
+        <div class="kicker">GitHub Agentic SDLC demo · To-Do app</div>
+        <h1>Component architecture</h1>
+        <p class="subtitle">
+          GitHub Actions runs the deterministic checks and deployment. gh-aw agents use OpenAI Codex to
+          reason about the same repository and write back only through bounded safe outputs.
+        </p>
+      </div>
+
+      <!-- People -->
+      <div id="dev" class="box human" style="left: 40px; top: 175px; width: 200px; height: 245px">
+        <div class="title">Developer / Maintainer</div>
+        <ul>
+          <li>Opens issues and PRs</li>
+          <li>Applies the ai-fix label</li>
+          <li>Dispatches manual agents</li>
+          <li>Reviews and merges</li>
+        </ul>
+      </div>
+
+      <div id="review" class="box human" style="left: 40px; top: 520px; width: 200px; height: 260px">
+        <div class="title">Human review</div>
+        <div class="sub">Every agent result arrives as a comment, label, issue or draft PR.</div>
+        <ul>
+          <li>Accept, change or close</li>
+          <li>Merge after CI passes</li>
+          <li>Agents never approve, merge or deploy</li>
+        </ul>
+      </div>
+
+      <!-- Repository -->
+      <div class="region repo" style="left: 300px; top: 175px; width: 300px; height: 730px">
+        <div class="region-title">GitHub repository</div>
+      </div>
+
+      <div id="events" class="box plain" style="left: 316px; top: 215px; width: 268px; height: 165px">
+        <div class="title">Events</div>
+        <div class="row">
+          <span class="chip mono">push</span>
+          <span class="chip mono">pull_request</span>
+          <span class="chip mono">issues: opened</span>
+          <span class="chip mono">label: ai-fix</span>
+          <span class="chip mono">CI failed</span>
+          <span class="chip mono">workflow_dispatch</span>
+        </div>
+      </div>
+
+      <div id="defs" class="box plain" style="left: 316px; top: 397px; width: 268px; height: 168px">
+        <div class="title">Workflow definitions</div>
+        <ul>
+          <li><span class="mono">ci.yml</span>, <span class="mono">deploy.yml</span> (handwritten)</li>
+          <li>8 agent sources <span class="mono">ai-*.md</span></li>
+          <li><span class="mono">gh aw compile</span> → <span class="mono">*.lock.yml</span></li>
+          <li><span class="mono">workflows:check</span> enforces policy</li>
+        </ul>
+      </div>
+
+      <div id="branches" class="box plain" style="left: 316px; top: 585px; width: 268px; height: 130px">
+        <div class="title">Branches</div>
+        <ul>
+          <li><span class="mono">main</span>: always correct</li>
+          <li><span class="mono">demo/**</span>: demo fixtures</li>
+          <li><span class="mono">codex/**</span>: agent PR branches</li>
+        </ul>
+      </div>
+
+      <div id="secrets" class="box plain" style="left: 316px; top: 735px; width: 268px; height: 150px">
+        <div class="title">Secrets and settings</div>
+        <ul>
+          <li><span class="mono">OPENAI_API_KEY</span></li>
+          <li><span class="mono">GH_AW_CI_TRIGGER_TOKEN</span> (optional)</li>
+          <li>Pages environment, rulesets</li>
+        </ul>
+      </div>
+
+      <!-- Lane 1: deterministic CI/CD -->
+      <div class="region actions" style="left: 670px; top: 175px; width: 890px; height: 225px">
+        <div class="region-title">Deterministic CI/CD · GitHub Actions</div>
+        <div class="region-note">“Did the predefined checks pass?”</div>
+      </div>
+
+      <div id="ci" class="box actions" style="left: 700px; top: 222px; width: 290px; height: 150px">
+        <div class="title">CI · <span class="mono">ci.yml</span></div>
+        <div class="sub">Every PR, every push to main, manual. Runs without an API key.</div>
+        <div class="row">
+          <span class="chip">policy check</span>
+          <span class="chip">lint</span>
+          <span class="chip">test</span>
+          <span class="chip">build</span>
+        </div>
+      </div>
+
+      <div id="deploy" class="box actions" style="left: 1040px; top: 222px; width: 270px; height: 150px">
+        <div class="title">Deploy · <span class="mono">deploy.yml</span></div>
+        <div class="sub">Push to main. Repeats the checks, builds with the Pages base path and uploads the artifact.</div>
+      </div>
+
+      <div id="pages" class="box actions" style="left: 1360px; top: 222px; width: 170px; height: 150px">
+        <div class="title">GitHub Pages</div>
+        <div class="sub">To-Do app: React + Vite, browser localStorage</div>
+      </div>
+
+      <!-- Lane 2: agentic workflows -->
+      <div class="region agent" style="left: 670px; top: 440px; width: 890px; height: 465px">
+        <div class="region-title">Agentic workflows · gh-aw</div>
+        <div class="region-note">“What does this change mean, and what should happen next?”</div>
+      </div>
+
+      <div id="agentjob" class="box agent" style="left: 700px; top: 485px; width: 480px; height: 220px">
+        <div class="title-row">
+          <div class="title">Agent job</div>
+          <span class="chip">sandbox + network firewall</span>
+        </div>
+        <div class="row">
+          <span class="chip">Codex CLI</span>
+          <span class="chip">GitHub MCP read tools</span>
+          <span class="chip">read-only <span class="mono">GITHUB_TOKEN</span></span>
+        </div>
+        <div class="sub" style="margin-top: 4px"><strong>Investigators</strong>: no checkout, no shell</div>
+        <div class="row">
+          <span class="chip">PR Reviewer</span>
+          <span class="chip">Security Review</span>
+          <span class="chip">Issue Triage</span>
+          <span class="chip">CI Investigator</span>
+          <span class="chip">Release Readiness</span>
+        </div>
+        <div class="sub"><strong>Builders</strong>: local checkout, shell, Node 24</div>
+        <div class="row">
+          <span class="chip">Issue Fixer</span>
+          <span class="chip">Implement Task</span>
+          <span class="chip">Documentation Updater</span>
+        </div>
+      </div>
+
+      <div id="openai" class="box model" style="left: 1290px; top: 485px; width: 240px; height: 220px">
+        <div class="title">OpenAI API</div>
+        <div class="sub"><span class="mono">openai/gpt-5.4-mini</span>, reasoning effort low</div>
+        <ul>
+          <li>Auth: <span class="mono">OPENAI_API_KEY</span> Actions secret</li>
+          <li>Inference only; no GitHub access</li>
+          <li>Also runs threat detection</li>
+        </ul>
+      </div>
+
+      <div id="detect" class="box guard" style="left: 700px; top: 745px; width: 250px; height: 135px">
+        <div class="title">Threat detection</div>
+        <div class="sub">Codex checks the proposed output and patch for prompt injection, secret leaks and malicious code.</div>
+      </div>
+
+      <div id="safe" class="box guard" style="left: 1000px; top: 745px; width: 260px; height: 135px">
+        <div class="title">Safe-outputs job</div>
+        <div class="sub">Separate job with a scoped write token. Enforces counts, allowed files, protected files and draft-only PRs.</div>
+      </div>
+
+      <div id="results" class="box plain" style="left: 1310px; top: 745px; width: 220px; height: 135px">
+        <div class="title">GitHub results</div>
+        <ul>
+          <li>Review comments</li>
+          <li>Labels and comments</li>
+          <li>Issues, draft PRs</li>
+        </ul>
+      </div>
+
+      <!-- Connectors -->
+      <i data-wire data-from="dev:r" data-to="events:l" data-route="h" data-tone="human" data-label="events"></i>
+      <i data-wire data-from="events:r:0.5" data-to="ci:l" data-route="h" data-tone="actions" data-label="push · PR"></i>
+      <i data-wire data-from="events:r:0.85" data-to="agentjob:l:0.5" data-route="hvh" data-via="635" data-tone="agent" data-label="triggers" data-label-at="0.5"></i>
+      <i data-wire data-from="ci:r" data-to="deploy:l" data-route="h" data-tone="actions" data-label="green"></i>
+      <i data-wire data-from="deploy:r" data-to="pages:l" data-route="h" data-tone="actions"></i>
+      <i data-wire data-from="ci:b:0.93" data-to="agentjob:t:0.5625" data-route="v" data-tone="fail" data-dash data-label="CI failed → CI Investigator"></i>
+      <i data-wire data-from="agentjob:r" data-to="openai:l" data-route="h" data-tone="model" data-both data-label="inference"></i>
+      <i data-wire data-from="agentjob:b:0.26" data-to="detect:t" data-route="v" data-tone="agent" data-label="safe-output request (JSON + patch)"></i>
+      <i data-wire data-from="detect:r" data-to="safe:l" data-route="h" data-tone="guard" data-label="pass"></i>
+      <i data-wire data-from="safe:r" data-to="results:l" data-route="h" data-tone="guard" data-label="write"></i>
+      <i data-wire data-from="results:b" data-to="review:b" data-points="1420,945 140,945" data-tone="repo" data-label="comment · labels · issue · draft PR" data-label-at="0.55"></i>
+      <i data-wire data-from="review:r" data-to="branches:l" data-route="h" data-tone="human" data-label="merge"></i>
+    </div>
+    <script src="diagram.js"></script>
+  </body>
+</html>
