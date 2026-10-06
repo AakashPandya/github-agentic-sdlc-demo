@@ -22,17 +22,30 @@ unchanged except that Vite can receive the destination Pages base path at build 
 | `npm test` | 19 tests passed across 3 files |
 | `npm run build` | Passed |
 | Renamed repository build | `PAGES_BASE_PATH=/renamed-org-demo/ npm run build` passed; generated asset path verified |
-| `gh aw compile --approve` | 8 succeeded, zero warnings after acknowledging the requested API credential migration |
-| `gh aw validate` | 8 succeeded; before committing, 8 safe-update warnings about the newly authorized API secret references |
-| `gh aw validate --strict` | 8 succeeded; before committing, the same 8 migration warnings |
+| `gh aw compile` | 8 succeeded, zero warnings on the committed migration |
+| `gh aw validate` | 8 succeeded, zero warnings |
+| `gh aw validate --strict` | 8 succeeded, zero warnings |
 | Generated action-pin comparison | No action pins changed from the prior committed locks |
 | Credential review | OpenAI inference wiring verified; generic activation-only legacy-token validation documented |
 
-The warnings compare against the old committed Copilot manifests; the audit documents the
-new secret names and their use. Once the migrated locks are committed, rerun ordinary
-compile/validate and record the resulting baseline. No unsupported frontmatter or hand-edited
-lock files were retained. This compiler rejects newer `network.hosted-web` syntax; actual
-Codex command lines disable web search/fetch and the policy check verifies that behavior.
+The initial safe-update warnings compared against the old Copilot manifests. The new
+credential references were reviewed and acknowledged with `gh aw compile --approve`, then
+committed. Ordinary compile and both validate commands were rerun against the new committed
+baseline and all reported zero warnings. No unsupported frontmatter or hand-edited lock files
+were retained. This compiler rejects newer `network.hosted-web` syntax; actual Codex command
+lines disable web search/fetch and the policy check verifies that behavior.
+
+## Updated demo branches
+
+Main was merged into all three existing local fixtures, carrying the new engine, prompts,
+locks, policy checks, documentation and package lock without merging defects into main.
+
+| Branch | Policy / lint / build | Tests after migration |
+|---|---|---|
+| main | Passed | 19 passed |
+| demo/pr-review | Passed | 19 passed; intentional uncovered review defects retained |
+| demo/ci-failure | Passed | 19 passed, exactly 1 expected failure |
+| demo/issue-fix | Passed | 17 passed; isolated blank-task fixture retained |
 
 ## Runtime limits
 
