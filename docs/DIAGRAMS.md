@@ -25,7 +25,9 @@ Every result comes back to a person.
 
 Read it column by column. People decide and review (green), agents investigate or propose
 (purple), and GitHub Actions gates every PR and deployment (blue). The dashed red arrow is
-the failure path: a failed or timed-out CI run starts the CI Investigator.
+the failure path: a failed or timed-out CI run starts the CI Investigator. The asterisk
+marks a real limit: a PR created by an agent starts CI and PR review only when
+`GH_AW_CI_TRIGGER_TOKEN` is set. Otherwise a person runs CI on the branch.
 
 ## Inside one agent run
 

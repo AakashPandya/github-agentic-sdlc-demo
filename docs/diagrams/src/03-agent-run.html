@@ -57,7 +57,7 @@
         <ul style="margin-top: 4px">
           <li>Checks the actor’s role (ai-fix needs write access)</li>
           <li>Validates the lock file and API key secret</li>
-          <li>Builds the prompt with sanitized event text</li>
+          <li>Builds the prompt from the .md source and event context</li>
         </ul>
         <div class="out" style="color: var(--muted)">→ prompt</div>
       </div>
@@ -70,10 +70,10 @@
         <div class="title-row"><span class="step">3</span><div class="title">Agent job</div><span class="chip mono">agent</span></div>
         <div class="sub">Codex investigates the repository and drafts its answer.</div>
         <ul>
-          <li>Codex CLI, 20 turns (40 for builders)</li>
+          <li>Codex CLI: 20 turns; 40 for Issue Fixer and Implement Task</li>
           <li>GitHub MCP read tools for issues, PRs, runs and source</li>
-          <li>Builders only: local checkout, shell, edit, Node 24</li>
-          <li>Network allowlist: defaults, GitHub, Codex (+ Node for builders)</li>
+          <li>Builders: local checkout, shell and edit</li>
+          <li>Network: defaults, GitHub, Codex; Node 24 and npm only for Issue Fixer and Implement Task</li>
         </ul>
         <div class="row">
           <span class="chip">read-only <span class="mono">GITHUB_TOKEN</span></span>
@@ -96,7 +96,7 @@
         <div class="row"><span class="chip mono">safe_outputs</span></div>
         <ul>
           <li>Only job that publishes agent output</li>
-          <li>Maximum count per output type</li>
+          <li>Count limits and text sanitizing</li>
           <li>Allowed files: <span class="mono">src/**</span>, <span class="mono">tests/**</span> or <span class="mono">README.md</span></li>
           <li>Protected files blocked</li>
           <li>PRs are drafts on <span class="mono">codex/**</span></li>
@@ -140,7 +140,7 @@
       <div class="footnote">
         Job names match the compiled <span class="mono">*.lock.yml</span>:
         <span class="mono">pre_activation → activation → agent → detection → safe_outputs → conclusion</span>.
-        The conclusion job reports run status only.
+        The conclusion job reports status, no-op results and failures.
       </div>
 
       <!-- Connectors -->

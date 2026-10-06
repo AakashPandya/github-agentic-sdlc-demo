@@ -60,13 +60,11 @@
         font-weight: 700;
         color: var(--agent);
       }
-      .empty {
+      .note {
         position: absolute;
         font-size: 12.5px;
-        font-style: italic;
-        color: var(--faint);
-        transform: translate(-50%, -50%);
-        white-space: nowrap;
+        line-height: 1.45;
+        color: var(--muted);
       }
     </style>
   </head>
@@ -117,7 +115,7 @@
       </div>
       <div id="p-review" class="box human" style="left: 750px; top: 200px; width: 320px; height: 125px">
         <div class="title">Review the draft PR</div>
-        <div class="sub">Read agent findings and CI results, then change, merge or close. Rulesets require this step.</div>
+        <div class="sub">Read agent findings and CI results, then change, merge or close. Only a person can merge.</div>
       </div>
       <div id="p-release" class="box human" style="left: 1170px; top: 200px; width: 170px; height: 125px">
         <div class="title">Decide on release</div>
@@ -170,7 +168,7 @@
         <div class="title">Release Readiness</div>
         <div class="row"><span class="chip mono">manual</span></div>
         <div class="sub">Checks CI on the current main SHA, open blockers, tests and docs.</div>
-        <div class="out">→ 1 advisory issue: READY, CAUTION or NOT READY</div>
+        <div class="out">→ 1 advisory issue: READY, READY WITH CAUTION or NOT READY</div>
       </div>
 
       <div id="a-docs" class="box agent" style="left: 1390px; top: 405px; width: 170px; height: 300px">
@@ -181,7 +179,7 @@
       </div>
 
       <!-- Actions lane -->
-      <div class="empty" style="left: 310px; top: 850px">no deterministic step</div>
+      <div class="note" style="left: 220px; top: 812px; width: 330px">* An agent-created PR starts CI and PR review only when <span class="mono">GH_AW_CI_TRIGGER_TOKEN</span> is set. Otherwise a person runs CI on the branch.</div>
       <div id="x-ci" class="box actions" style="left: 750px; top: 795px; width: 320px; height: 110px">
         <div class="title">CI · <span class="mono">ci.yml</span></div>
         <div class="sub">Every PR and every push to main</div>
@@ -202,8 +200,8 @@
       <i data-wire data-from="p-plan:b" data-to="a-triage:t" data-route="v" data-tone="agent" data-label="issue opened"></i>
       <i data-wire data-from="a-triage:r:0.5" data-to="p-build:l:0.5" data-route="hvh" data-via="440" data-tone="agent" data-label="labels +<br>comment"></i>
       <i data-wire data-from="p-build:b" data-to="a-build:t" data-route="v" data-tone="human" data-label="ai-fix · dispatch"></i>
-      <i data-wire data-from="a-build:r:0.227" data-to="a-pr:l" data-route="h" data-tone="agent" data-label="draft PR" data-label-dy="-14"></i>
-      <i data-wire data-from="a-build:b" data-to="x-ci:l" data-route="vh" data-tone="actions" data-label="PR runs CI" data-label-at="0.72"></i>
+      <i data-wire data-from="a-build:r:0.227" data-to="a-pr:l" data-route="h" data-tone="agent" data-label="draft<br>PR*"></i>
+      <i data-wire data-from="a-build:b" data-to="x-ci:l" data-route="vh" data-tone="actions" data-label="PR runs CI*" data-label-at="0.72"></i>
       <i data-wire data-from="a-pr:t" data-to="p-review:b:0.234" data-route="v" data-tone="agent" data-label="findings"></i>
       <i data-wire data-from="a-sec:t" data-to="p-review:b:0.766" data-route="v" data-tone="agent" data-label="findings"></i>
       <i data-wire data-from="x-ci:t" data-to="a-ci:b" data-route="v" data-tone="fail" data-dash data-label="failure or timeout"></i>
