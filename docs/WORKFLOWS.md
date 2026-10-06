@@ -2,7 +2,7 @@
 
 Source files live under `.github/workflows/`. Each `.md` is compiled to its matching
 `.lock.yml` with gh-aw v0.89.21. Commit both; never manually edit generated YAML.
-All eight agents use **engine: codex** and **model: openai/gpt-6.1-sol**.
+All eight agents use **engine: codex** and **model: openai/gpt-5.4-mini**.
 OpenAI inference is authenticated using the target repository's **OPENAI_API_KEY** secret.
 The generated integration accepts CODEX_API_KEY as an alternative and gives it precedence;
 configure only OPENAI_API_KEY for this setup. No Copilot inference permission is granted.
@@ -19,7 +19,7 @@ Writers edit a local checkout and publish only bounded safe outputs. No agent me
 - Source: [`ai-pr-review.md`](../.github/workflows/ai-pr-review.md)
 - Generated: `ai-pr-review.lock.yml`
 - Trigger: PR opened, reopened, synchronize.
-- Runtime engine: `codex`, model `openai/gpt-6.1-sol`.
+- Runtime engine: `codex`, model `openai/gpt-5.4-mini`.
 - Authentication: OpenAI API project key stored as Actions secret `OPENAI_API_KEY`.
 - Repository read permissions: `contents` plus pull-requests.
 - Safe outputs: create-pull-request-review-comment ≤5; submit-pull-request-review ≤1.
@@ -31,7 +31,7 @@ Writers edit a local checkout and publish only bounded safe outputs. No agent me
 - Source: [`ai-security-review.md`](../.github/workflows/ai-security-review.md)
 - Generated: `ai-security-review.lock.yml`
 - Trigger: PR opened, reopened, synchronize; manual.
-- Runtime engine: `codex`, model `openai/gpt-6.1-sol`.
+- Runtime engine: `codex`, model `openai/gpt-5.4-mini`.
 - Authentication: OpenAI API project key stored as Actions secret `OPENAI_API_KEY`.
 - Repository read permissions: `contents` plus pull-requests, issues.
 - Safe outputs: Review comments ≤5; review ≤1; create-issue ≤1.
@@ -43,7 +43,7 @@ Writers edit a local checkout and publish only bounded safe outputs. No agent me
 - Source: [`ai-issue-triage.md`](../.github/workflows/ai-issue-triage.md)
 - Generated: `ai-issue-triage.lock.yml`
 - Trigger: Issue opened; all reporter roles.
-- Runtime engine: `codex`, model `openai/gpt-6.1-sol`.
+- Runtime engine: `codex`, model `openai/gpt-5.4-mini`.
 - Authentication: OpenAI API project key stored as Actions secret `OPENAI_API_KEY`.
 - Repository read permissions: `contents` plus issues.
 - Safe outputs: add-labels ≤1 call, allowlisted labels; add-comment ≤1.
@@ -55,7 +55,7 @@ Writers edit a local checkout and publish only bounded safe outputs. No agent me
 - Source: [`ai-issue-fixer.md`](../.github/workflows/ai-issue-fixer.md)
 - Generated: `ai-issue-fixer.lock.yml`
 - Trigger: label_command ai-fix, issues only; write/maintainer/admin actor.
-- Runtime engine: `codex`, model `openai/gpt-6.1-sol`.
+- Runtime engine: `codex`, model `openai/gpt-5.4-mini`.
 - Authentication: OpenAI API project key stored as Actions secret `OPENAI_API_KEY`.
 - Repository read permissions: `contents` plus issues, pull-requests.
 - Safe outputs: create-pull-request ≤1; add-comment ≤1.
@@ -67,7 +67,7 @@ Writers edit a local checkout and publish only bounded safe outputs. No agent me
 - Source: [`ai-implement-task.md`](../.github/workflows/ai-implement-task.md)
 - Generated: `ai-implement-task.lock.yml`
 - Trigger: workflow_dispatch; required string input task.
-- Runtime engine: `codex`, model `openai/gpt-6.1-sol`.
+- Runtime engine: `codex`, model `openai/gpt-5.4-mini`.
 - Authentication: OpenAI API project key stored as Actions secret `OPENAI_API_KEY`.
 - Repository read permissions: `contents` plus pull-requests.
 - Safe outputs: create-pull-request ≤1.
@@ -79,7 +79,7 @@ Writers edit a local checkout and publish only bounded safe outputs. No agent me
 - Source: [`ai-ci-investigator.md`](../.github/workflows/ai-ci-investigator.md)
 - Generated: `ai-ci-investigator.lock.yml`
 - Trigger: CI workflow_run completed, conclusion failure/timed_out; main/demo/**/codex/**.
-- Runtime engine: `codex`, model `openai/gpt-6.1-sol`.
+- Runtime engine: `codex`, model `openai/gpt-5.4-mini`.
 - Authentication: OpenAI API project key stored as Actions secret `OPENAI_API_KEY`.
 - Repository read permissions: `contents` plus actions, issues, pull-requests.
 - Safe outputs: create-issue ≤1.
@@ -91,7 +91,7 @@ Writers edit a local checkout and publish only bounded safe outputs. No agent me
 - Source: [`ai-release-readiness.md`](../.github/workflows/ai-release-readiness.md)
 - Generated: `ai-release-readiness.lock.yml`
 - Trigger: workflow_dispatch.
-- Runtime engine: `codex`, model `openai/gpt-6.1-sol`.
+- Runtime engine: `codex`, model `openai/gpt-5.4-mini`.
 - Authentication: OpenAI API project key stored as Actions secret `OPENAI_API_KEY`.
 - Repository read permissions: `contents` plus actions, issues, pull-requests.
 - Safe outputs: create-issue ≤1.
@@ -103,7 +103,7 @@ Writers edit a local checkout and publish only bounded safe outputs. No agent me
 - Source: [`ai-docs-updater.md`](../.github/workflows/ai-docs-updater.md)
 - Generated: `ai-docs-updater.lock.yml`
 - Trigger: workflow_dispatch.
-- Runtime engine: `codex`, model `openai/gpt-6.1-sol`.
+- Runtime engine: `codex`, model `openai/gpt-5.4-mini`.
 - Authentication: OpenAI API project key stored as Actions secret `OPENAI_API_KEY`.
 - Repository read permissions: `contents` plus pull-requests.
 - Safe outputs: create-pull-request ≤1; README.md only.
@@ -153,7 +153,9 @@ configuration, artifact-upload and deployment actions pinned to verified release
 
 The installed CLI's `--help`, actual compiler and strict validation were also checked.
 The selected model is explicit, not an account-dependent engine default. Read-only agents
-allow 40 model turns; implementation/fixer agents allow 80. These are usage controls, not
+allow 20 model turns; implementation/fixer agents allow 40. All agents use low reasoning effort.
+Threat detection uses the same mini model with framework-default reasoning and a separate 10-turn limit.
+Automatic agent harness retries are disabled for the one-day demo. These are usage controls, not
 a guaranteed dollar cap. The generated detection stage also uses Codex/OpenAI inference.
 
 Live documentation can run ahead of the installed preview release; unsupported syntax

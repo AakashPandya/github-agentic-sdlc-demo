@@ -22,14 +22,17 @@ for (const name of sources) {
   const lockText = readFileSync(new URL(name.replace('.md', '.lock.yml'), root), 'utf8')
   const lock = parse(lockText)
   const metadata = JSON.parse(lockText.split('\n')[0].replace('# gh-aw-metadata: ', ''))
-  assert.equal(config.engine, 'codex', `${name}: unexpected engine`)
-  assert.equal(config.model, 'openai/gpt-6.1-sol', `${name}: unexpected model/provider`)
-  assert.equal(metadata.agent_id, config.engine, `${name}: stale lock engine`)
+  assert.equal(config.engine.id, 'codex', `${name}: unexpected engine`)
+  assert.equal(config.model, 'openai/gpt-5.4-mini', `${name}: unexpected model/provider`)
+  assert.equal(metadata.agent_id, config.engine.id, `${name}: stale lock engine`)
   assert.equal(metadata.agent_model, config.model, `${name}: stale lock model`)
   assert.equal(metadata.strict, true, `${name}: strict mode disabled`)
   assert.equal(metadata.body_hash, createHash('sha256').update(parts[2].trim()).digest('hex'), `${name}: prompt changed; run gh aw compile`)
   assert.ok(config.network.allowed.includes('codex'), `${name}: missing OpenAI network access`)
   assert.ok(!config.network.allowed.includes('copilot'), `${name}: stale inference network`)
+  assert.deepEqual(config.engine.args, ['-c', 'model_reasoning_effort="low"'], `${name}: expected low reasoning`)
+  assert.equal(config.engine.harness['max-retries'], 0, `${name}: automatic inference retries enabled`)
+  assert.equal(config['max-turns'], codeWriters.has(name) ? 40 : 20, `${name}: unexpected turn budget`)
   assert.equal(config.tools['cli-proxy'], false)
   assert.equal(config.tools.bash, prWriters.has(name), `${name}: wrong shell policy`)
   for (const [scope, value] of Object.entries(config.permissions)) {
@@ -49,9 +52,23 @@ for (const name of sources) {
     assert.equal(config.checkout, false)
     assert.ok(!lock.jobs.agent.steps.some(step => step.uses?.startsWith('actions/checkout@')), `${name}: unexpected agent checkout`)
   }
+  const execution = lock.jobs.agent.steps.find(step => step.env?.GH_AW_MODEL_AGENT_CODEX)
+  assert.equal(execution?.env.GH_AW_MODEL_AGENT_CODEX, 'gpt-5.4-mini', `${name}: wrong runtime model`)
+  assert.ok(execution.run.includes('-c model_reasoning_effort="low"'), `${name}: missing runtime reasoning argument`)
+  assert.equal(execution.env.GH_AW_HARNESS_MAX_RETRIES, 0, `${name}: stale retry policy`)
+  assert.equal(execution?.env.GH_AW_MAX_TURNS, config['max-turns'], `${name}: stale runtime turn limit`)
   const outputs = config['safe-outputs']
+  const detection = outputs['threat-detection'].engine
+  assert.equal(detection.id, 'codex')
+  assert.equal(detection.model, config.model)
+  assert.equal(detection['max-turns'], 10)
+  const detectionJob = lock.jobs.detection
+  const detectionExecution = detectionJob.steps.find(step => step.env?.GH_AW_MODEL_DETECTION_CODEX)
+  assert.equal(detectionExecution?.env.GH_AW_MODEL_DETECTION_CODEX, 'gpt-5.4-mini', `${name}: wrong detection model`)
+  assert.equal(detectionExecution?.env.GH_AW_MAX_TURNS, 10, `${name}: stale detection turn limit`)
   assert.equal(outputs['merge-pull-request'], undefined)
   for (const [type, output] of Object.entries(outputs)) {
+    if (type === 'threat-detection') continue
     assert.ok(Number.isInteger(output.max) && output.max >= 1 && output.max <= 5, `${name}: ${type} needs a bounded max`)
   }
   const review = outputs['submit-pull-request-review']

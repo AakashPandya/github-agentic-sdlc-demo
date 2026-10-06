@@ -4,6 +4,19 @@ Scope: all eight agent Markdown sources and generated locks, deterministic CI/de
 demo documentation, portable setup, and local policy checks. This is a static/configuration
 audit plus local validation. It is not evidence of a successful OpenAI/GitHub-hosted run.
 
+## Budget update — 6 October 2026
+
+The initial Codex migration below used GPT-6.1 sol. The current sources and locks now use
+GPT-5.4 mini: low reasoning, 20 turns for readers/docs, 40 for code writers, and no automatic
+agent harness retries. Threat detection remains enabled on the same mini model with a
+10-turn limit and framework-default reasoning. Authentication and permissions are unchanged.
+
+The installed v0.89.21 compiler appends `engine.config` TOML after table declarations,
+and the standalone detection path does not carry that custom config. Therefore the main
+agent uses `engine.args` to pass `-c model_reasoning_effort="low"` explicitly. The policy
+checker verifies the actual generated command, model and turn/retry environment. No
+unsupported claim of low reasoning for detection is made. See [BUDGET-DEMO.md](BUDGET-DEMO.md).
+
 ## Findings and corrections
 
 | Finding | Resolution |

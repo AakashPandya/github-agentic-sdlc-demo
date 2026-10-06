@@ -1,3 +1,28 @@
+# Budget model validation — 6 October 2026
+
+The current configuration supersedes the initial migration model recorded below.
+All eight workflows use `openai/gpt-5.4-mini` through Codex, low reasoning via CLI args,
+20 turns for readers/docs and 40 for code writers, with automatic agent retries disabled.
+Detection uses the same model, framework-default reasoning and 10 turns.
+
+Observed locally:
+
+- `gh aw compile --validate --strict`: all 8 succeeded, zero warnings.
+- `npm run workflows:check`: all 8 passed, including runtime model, reasoning argument,
+  retry policy, agent/detection turn limits and the existing permission/output boundaries.
+- Negative probes rejected an expensive stale runtime model, a widened detection turn
+  limit, and a high-reasoning runtime argument. Each fixture was restored afterward.
+- `npm run lint`, `npm test` (19 tests), and `npm run build`: passed.
+- All 8 generated dependency/credential manifests match the previous commit exactly.
+- Official OpenAI model capabilities/prices and GitHub's Codex cost guidance were checked.
+
+No API key was read and no live inference was executed. This verifies documented support
+and the pinned compiler's emitted configuration; it does not confirm this user's API billing,
+model access, account rate limits, or end-to-end hosted behavior. Complete the first run in
+[BUDGET-DEMO.md](BUDGET-DEMO.md) after funding the API project and configuring its secret.
+
+---
+
 # Validation report — Codex migration, 6 October 2026
 
 All work was performed in this existing repository. No organization repository was created,

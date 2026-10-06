@@ -83,8 +83,11 @@ be followed by compilation, strict validation and review of generated changes.
 
 ## 4. Add your OpenAI API key in GitHub
 
+For a one-day trial, start with [BUDGET-DEMO.md](BUDGET-DEMO.md). The current
+workflows use GPT-5.4 mini, low reasoning and reduced turn limits.
+
 1. Open [OpenAI Platform](https://platform.openai.com/) and select the organization-approved
-   API project. Enable API billing/credits as required and verify access to **gpt-6.1-sol**.
+   API project. Enable API billing/credits as required and verify access to **gpt-5.4-mini**.
    ChatGPT subscription access does not configure API billing for this integration.
 2. Create an API key through [API keys](https://platform.openai.com/api-keys). Prefer an
    organization-managed project/service-account key for team automation. Apply your
@@ -112,7 +115,7 @@ The compiler may mention COPILOT_GITHUB_TOKEN in a generic activation token-type
 leave it unset. If an inherited legacy OAuth token trips that check, remove this repo's
 access to that unused token. It is not used for Codex inference.
 
-The checked-in model declaration is `model: openai/gpt-6.1-sol`. If your API project cannot
+The checked-in model declaration is `model: openai/gpt-5.4-mini`. If your API project cannot
 access it, have its administrator enable an approved compatible model, edit the model
 fields consistently and update the policy check's expected model before recompiling.
 Do not silently select another provider. Runtime access is not established by compilation.
@@ -220,4 +223,4 @@ Official references: [gh-aw Codex](https://github.github.com/gh-aw/engines/codex
 [gh-aw authentication](https://github.github.com/gh-aw/reference/auth/),
 [OpenAI quickstart](https://developers.openai.com/api/docs/quickstart),
 [API credential handling](https://developers.openai.com/api/reference/overview),
-[configured model](https://developers.openai.com/api/docs/models/gpt-6.1-sol).
+[configured model](https://developers.openai.com/api/docs/models/gpt-5.4-mini).

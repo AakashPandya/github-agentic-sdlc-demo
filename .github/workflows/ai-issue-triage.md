@@ -5,8 +5,12 @@ on:
   issues:
     types: [opened]
   roles: all
-engine: codex
-model: openai/gpt-6.1-sol
+engine:
+  id: codex
+  args: ["-c", 'model_reasoning_effort="low"']
+  harness:
+    max-retries: 0
+model: openai/gpt-5.4-mini
 permissions:
   contents: read
   issues: read
@@ -18,9 +22,14 @@ tools:
   cli-proxy: false
   github:
     toolsets: [repos, issues]
-max-turns: 40
+max-turns: 20
 timeout-minutes: 15
 safe-outputs:
+  threat-detection:
+    engine:
+      id: codex
+      model: openai/gpt-5.4-mini
+      max-turns: 10
   add-labels:
     allowed: [bug, enhancement, question, documentation, security, needs-info, priority-high, priority-medium, priority-low]
     max: 1

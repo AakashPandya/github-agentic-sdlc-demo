@@ -8,8 +8,12 @@ on:
         description: "Engineering requirement for Codex to implement"
         required: true
         type: string
-engine: codex
-model: openai/gpt-6.1-sol
+engine:
+  id: codex
+  args: ["-c", 'model_reasoning_effort="low"']
+  harness:
+    max-retries: 0
+model: openai/gpt-5.4-mini
 concurrency:
   job-discriminator: ${{ github.run_id }}
 permissions:
@@ -26,11 +30,16 @@ tools:
     toolsets: [repos, pull_requests]
   bash: true
   edit:
-max-turns: 80
+max-turns: 40
 timeout-minutes: 25
 checkout:
   ref: main
 safe-outputs:
+  threat-detection:
+    engine:
+      id: codex
+      model: openai/gpt-5.4-mini
+      max-turns: 10
   create-pull-request:
     max: 1
     draft: true

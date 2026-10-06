@@ -1,6 +1,6 @@
 # Customer demo: To-Do App CI/CD with gh-aw Agents
 
-Target duration: **13–15 minutes**. Runtime engine: **OpenAI Codex**; inference uses **OpenAI API / gpt-6.1-sol**.
+Target duration: **13–15 minutes**. Runtime engine: **OpenAI Codex**; inference uses **OpenAI API / gpt-5.4-mini**.
 Agent runs are asynchronous and can take longer than the speaking slot. Run a rehearsal
 and prepare completed examples beforehand; show live dispatch and the prepared result
 side by side. Never present a prepared result as a newly completed run.
@@ -78,7 +78,7 @@ Traditional CI answers: **“Did these predefined checks pass?”**
 ## Demo 3 — PR Review (2 minutes)
 
 Open “Improve task editing and display” and show green CI. Open `ai-pr-review.md` and
-point at **engine: codex**, **model: openai/gpt-6.1-sol**, read permissions, and the two bounded review safe outputs.
+point at **engine: codex**, **model: openai/gpt-5.4-mini**, read permissions, and the two bounded review safe outputs.
 
 Say: **“This is different. We're giving OpenAI Codex an engineering objective and
 repository context rather than a predefined sequence of analysis commands.”**

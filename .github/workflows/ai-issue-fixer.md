@@ -6,8 +6,12 @@ on:
     name: ai-fix
     events: [issues]
   roles: [admin, maintainer, write]
-engine: codex
-model: openai/gpt-6.1-sol
+engine:
+  id: codex
+  args: ["-c", 'model_reasoning_effort="low"']
+  harness:
+    max-retries: 0
+model: openai/gpt-5.4-mini
 concurrency:
   job-discriminator: ${{ github.run_id }}
 permissions:
@@ -25,11 +29,16 @@ tools:
     toolsets: [repos, issues, pull_requests]
   bash: true
   edit:
-max-turns: 80
+max-turns: 40
 timeout-minutes: 25
 checkout:
   ref: ${{ vars.DEMO_ISSUE_FIX_BASE == 'demo/issue-fix' && 'demo/issue-fix' || 'main' }}
 safe-outputs:
+  threat-detection:
+    engine:
+      id: codex
+      model: openai/gpt-5.4-mini
+      max-turns: 10
   create-pull-request:
     max: 1
     draft: true

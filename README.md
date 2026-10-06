@@ -6,7 +6,9 @@ GitHub Actions handles deterministic lint, test, build and deployment operations
 GitHub Agentic Workflows use **OpenAI Codex with an OpenAI API key** for reasoning-oriented
 software engineering tasks.
 
-**Runtime engine: `codex` · Inference model: `openai/gpt-6.1-sol`**
+**Runtime engine: `codex` · Inference model: `openai/gpt-5.4-mini` · Reasoning: `low`**
+
+For today’s small-budget trial, follow [the $5 demo guide](docs/BUDGET-DEMO.md).
 
 The original Copilot configuration has been replaced. The tool used to generate this
 repository is independent of its runtime engine. All eight agent sources now explicitly
@@ -86,8 +88,12 @@ repository setup, including transferring all local branches and configuring secr
 All sources use the same explicit engine/model selection:
 
 ```yaml
-engine: codex
-model: openai/gpt-6.1-sol
+engine:
+  id: codex
+  args: ["-c", 'model_reasoning_effort="low"']
+  harness:
+    max-retries: 0
+model: openai/gpt-5.4-mini
 permissions:
   contents: read
 ```

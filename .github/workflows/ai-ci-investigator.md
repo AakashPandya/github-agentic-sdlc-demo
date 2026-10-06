@@ -8,8 +8,12 @@ on:
     branches: [main, "demo/**", "codex/**"]
     conclusion: [failure, timed_out]
   roles: all
-engine: codex
-model: openai/gpt-6.1-sol
+engine:
+  id: codex
+  args: ["-c", 'model_reasoning_effort="low"']
+  harness:
+    max-retries: 0
+model: openai/gpt-5.4-mini
 permissions:
   contents: read
   actions: read
@@ -23,9 +27,14 @@ tools:
   cli-proxy: false
   github:
     toolsets: [repos, actions, issues, pull_requests]
-max-turns: 40
+max-turns: 20
 timeout-minutes: 15
 safe-outputs:
+  threat-detection:
+    engine:
+      id: codex
+      model: openai/gpt-5.4-mini
+      max-turns: 10
   create-issue:
     max: 1
     title-prefix: "[CI investigation] "
