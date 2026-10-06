@@ -1,70 +1,47 @@
-# Validation report
+# Validation report — Codex migration, 6 October 2026
 
-Verified locally on **5 October 2026** in the existing repository
-`AakashPandya/github-agentic-sdlc-demo`. No additional repository was created.
+All work was performed in this existing repository. No organization repository was created,
+no remote was changed, and no API key was created or read. The original application remains
+unchanged except that Vite can receive the destination Pages base path at build time.
 
-## Environment
+## Toolchain
+
+- gh-aw: v0.89.21; generated Codex CLI: 0.154.0.
+- Node: v24.20.0; npm: 11.19.0.
+- Configured inference: `engine: codex`, `model: openai/gpt-6.1-sol`.
+- GitHub CLI authentication: signed out; remote doctor/inference execution unavailable.
+
+## Checks performed
 
 | Check | Observed result |
 |---|---|
-| `gh --version` | 2.102.0 |
-| `gh auth status` | Not logged in; exit 1 |
-| `git --version` | 2.54.0 (Apple Git-157) |
-| `node --version` | v24.20.0 |
-| `npm --version` | 11.19.0 |
-| `gh aw version` | v0.89.21 |
-
-## Main application and workflows
-
-| Command/check | Actual result |
-|---|---|
-| `npm install` | Passed; lockfile generated; audit reported 0 vulnerabilities |
-| `npm ci` | Passed; audit reported 0 vulnerabilities |
+| npm dependency installation | Passed; added yaml development dependency; audit reported zero advisories |
+| `npm run workflows:check` | Passed for all 8 agents and deterministic deployment policy |
+| Negative policy probes | Correctly rejected repository write permission, alternate engine, stale prompt and reader shell enablement |
 | `npm run lint` | Passed |
-| `npm test` | Passed: 19 tests across 3 files |
-| `npm run build` | Passed: TypeScript and Vite production bundle |
-| `gh aw compile` | Passed: 8 workflows, 0 warnings |
-| `gh aw validate` | Passed: 8 workflows, 0 warnings |
-| `gh aw validate --strict` | Passed: 8 workflows, 0 warnings |
-| `gh aw doctor --repo AakashPandya/github-agentic-sdlc-demo` | Blocked: CLI not authenticated |
-| Browser check | Chromium desktop 1280×1000 and mobile 390×844; create, complete, reload persistence passed; no page errors or horizontal overflow |
-| Source/lock policy inspection | 8 explicit Copilot engines; repository agent permissions read-only; protected-file blocking and exclusive file allowlists; no merge outputs or APPROVE review event |
-| Forbidden runtime dependency search | No alternate runtime engine settings or third-party LLM API key references found |
+| `npm test` | 19 tests passed across 3 files |
+| `npm run build` | Passed |
+| Renamed repository build | `PAGES_BASE_PATH=/renamed-org-demo/ npm run build` passed; generated asset path verified |
+| `gh aw compile --approve` | 8 succeeded, zero warnings after acknowledging the requested API credential migration |
+| `gh aw validate` | 8 succeeded; before committing, 8 safe-update warnings about the newly authorized API secret references |
+| `gh aw validate --strict` | 8 succeeded; before committing, the same 8 migration warnings |
+| Generated action-pin comparison | No action pins changed from the prior committed locks |
+| Credential review | OpenAI inference wiring verified; generic activation-only legacy-token validation documented |
 
-Initial TypeScript test-query typing and one live-docs/compiler schema mismatch were
-corrected before these final results. Live docs list `add-labels.max-labels`; v0.89.21
-rejects it. The compatible source limits label calls to one and constrains allowed labels.
-Generated lock files were produced by the real compiler, not hand-authored.
+The warnings compare against the old committed Copilot manifests; the audit documents the
+new secret names and their use. Once the migrated locks are committed, rerun ordinary
+compile/validate and record the resulting baseline. No unsupported frontmatter or hand-edited
+lock files were retained. This compiler rejects newer `network.hosted-web` syntax; actual
+Codex command lines disable web search/fetch and the policy check verifies that behavior.
 
-`npm ci` emitted a macOS-only optional `fsevents` install-script approval warning;
-installation, test execution and the production build all succeeded. No approval policy
-was weakened. An audit result is a package advisory snapshot, not a comprehensive
-application security certification.
+## Runtime limits
 
-## What remains unverified remotely
+Local compilation and policy checks do not validate OpenAI billing, model entitlement, API
+limits, organization permission to send source context to OpenAI, GitHub action policy,
+PR creation or Pages access. No live inference request, remote PR or deployment was executed.
+Configure OPENAI_API_KEY in the target repository and perform the manual smoke test in
+[ORG-SETUP.md](ORG-SETUP.md). The API key and optional GitHub CI-trigger token are independent.
 
-No remote push, labels, issues, PRs, agent inference run or Pages deployment occurred:
-GitHub CLI is signed out. Copilot license, centralized organization billing, repository
-Actions policy, PR-creation permission, Pages availability and token configuration cannot
-be established locally. All workflows configure the recommended Actions-token inference
-method. The public GitHub account API confirms `AakashPandya` is a personal (`User`) owner;
-plan for the documented Copilot PAT fallback unless eligible organization billing is
-available. Neither inference method was exercised remotely.
-
-Agent findings and generated code cannot be promised in advance. The runbook provides
-scenarios and expected outcomes, not fabricated execution evidence. Optional CI-trigger
-PAT configuration is independent of Copilot authentication. gh-aw remains preview tooling;
-compilation does not prove a GitHub-hosted execution will succeed under account policies.
-
-## Isolated demo branches
-
-| Branch | Lint | Tests | Build | Intended behavior |
-|---|---|---|---|---|
-| `main` | Pass | 19 pass | Pass | Correct application |
-| `demo/pr-review` | Pass | 19 pass | Pass | Whitespace-only edits, unsafe HTML rendering and missing-ID replacement edge case, without new edge-case tests |
-| `demo/ci-failure` | Pass | 19 pass, exactly 1 fails | Pass | One incorrect assertion: expected remaining count 2, actual 1 |
-| `demo/issue-fix` | Pass | 17 pass | Pass | Isolated blank-creation regression with two whitespace cases deliberately absent; Copilot should restore validation and regression tests |
-
-These are local committed branches. The checkout is returned to main. The extra
-issue-fix branch resolves the conflict between a correct main application and a
-real bug for the issue-fixer demonstration; no broken fixture was merged into main.
+The app's desktop/mobile browser behavior was verified during initial creation. The migration
+changes workflow/configuration/documentation surfaces, not task interaction code. Intentional
+fixture defects are preserved on separate branches; never merge those fixtures into main.

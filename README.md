@@ -2,189 +2,176 @@
 
 This repository demonstrates how traditional GitHub Actions CI/CD and GitHub Agentic Workflows work together.
 
-GitHub Actions handles deterministic build, test and deployment operations.
+GitHub Actions handles deterministic lint, test, build and deployment operations.
+GitHub Agentic Workflows use **OpenAI Codex with an OpenAI API key** for reasoning-oriented
+software engineering tasks.
 
-GitHub Agentic Workflows use GitHub Copilot to perform reasoning-oriented software engineering tasks.
+**Runtime engine: `codex` · Inference model: `openai/gpt-6.1-sol`**
 
-**Runtime AI Engine: GitHub Copilot**
-
-The application/workflows may have been generated initially using any coding LLM.
-That generation-time LLM is unrelated to the runtime AI engine.
-All agentic workflows in this repository explicitly use GitHub Copilot (`engine: copilot`).
-No third-party LLM API key is needed.
+The original Copilot configuration has been replaced. The tool used to generate this
+repository is independent of its runtime engine. All eight agent sources now explicitly
+select Codex and OpenAI inference. A Copilot license is not required. ChatGPT subscription
+login is not used by this integration; API access and billing are configured on OpenAI Platform.
 
 ## Start locally
 
-Use Node.js 24 LTS and npm:
+Use Node.js 24 LTS:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the Vite URL ending in `/github-agentic-sdlc-demo/`. To verify the production build:
+Open the Vite URL ending in `/github-agentic-sdlc-demo/`. The application itself needs no
+API key or backend. It supports create/edit/delete, completion, All/Active/Completed
+filters, remaining count, clearing completed tasks and localStorage persistence.
+Enter saves an edit; Escape cancels it. Blank titles are rejected and titles render as
+text. Browser data is not encrypted, synced across devices or synchronized between tabs.
+Unreadable stored data is preserved and storage failures are reported in the UI.
 
 ```sh
+npm run workflows:check
 npm run lint
 npm test
 npm run build
 npm run preview
 ```
 
-Tasklight supports create, edit, delete, complete/incomplete, All/Active/Completed filters,
-remaining count, clearing completed tasks and browser-local persistence. Keyboard users
-can save edits with Enter and cancel with Escape. Tasks render as text, never HTML.
-Empty/whitespace-only titles are rejected. Data stays in localStorage on this browser and
-origin; it is not synced between devices or tabs. There is no backend or database.
-Unreadable stored data is preserved and changes remain session-only; storage failures
-are reported in the UI. Avoid storing sensitive information in task titles.
-
-React, TypeScript and Vite provide the application; Vitest and React Testing Library
-cover user interactions, state changes, persistence and storage failure handling.
-
 ## Two kinds of automation
 
 ```mermaid
 flowchart TD
     Developer --> Repository[GitHub Repository]
-    Repository --> Actions[Traditional CI/CD]
-    Repository --> Agents[gh-aw Agents]
-    Actions --> Checks[Deterministic lint / test / build]
-    Checks --> Deploy[GitHub Pages deployment]
-    Agents --> Copilot[GitHub Copilot reasoning]
-    Copilot --> Safe[Controlled safe outputs]
-    Safe --> Result[Comment / Issue / Pull Request]
+    Repository --> Actions[Traditional GitHub Actions]
+    Actions --> Checks[Workflow policy check / Lint / Tests / Build]
+    Checks --> Deploy[GitHub Pages]
+    Repository --> Agents[gh-aw agents]
+    Agents --> Codex[OpenAI Codex + OpenAI API]
+    Codex --> Safe[Bounded safe-output requests]
+    Safe --> Result[Comment / Issue / Draft PR]
     Result --> Human[Human review]
 ```
 
-Traditional CI answers **“Did these predefined checks pass?”** Copilot reviews meaning,
-investigates failures and proposes changes. A successful build alone cannot establish
-that every behavior is correct. Deployment is always deterministic and runs its own
-lint/test/build gate before publishing `dist`.
+CI answers **“Did these predefined checks pass?”** Codex investigates meaning and proposes
+changes. A green build is not proof of semantic correctness. Deployment remains entirely
+deterministic and checks its own build before publishing.
 
-| Workflow | Type | Runtime Engine | Trigger | Purpose |
+| Workflow | Type | Runtime | Trigger | Purpose |
 |---|---|---|---|---|
-| CI | GitHub Actions | N/A | PR / push to main / manual | Lint, tests, build |
-| Deploy | GitHub Actions | N/A | main / manual on main | GitHub Pages |
-| AI · PR Reviewer | gh-aw | Copilot | PR opened/reopened/synchronize | Semantic review |
-| AI · Security Review | gh-aw | Copilot | PR / manual | Evidence-backed security review |
-| AI · Issue Triage | gh-aw | Copilot | Issue opened | Classification, priority, missing context |
-| AI · Issue Fixer | gh-aw | Copilot | Human applies ai-fix | Issue → code/tests → draft PR |
-| AI · Implement Task | gh-aw | Copilot | Manual task input | Requirement → implementation → draft PR |
-| AI · CI Investigator | gh-aw | Copilot | CI failure/timeout | Evidence-based diagnosis |
-| AI · Release Readiness | gh-aw | Copilot | Manual | Advisory readiness report |
-| AI · Documentation Updater | gh-aw | Copilot | Manual | README accuracy → draft PR |
+| CI | GitHub Actions | None | PR, main push, manual | Workflow policy, lint, tests, build |
+| Deploy | GitHub Actions | None | main push, manual on main | Checked artifact → Pages |
+| AI · PR Reviewer | gh-aw | Codex / OpenAI API | PR opened/reopened/synchronize | Defects and test gaps |
+| AI · Security Review | gh-aw | Codex / OpenAI API | PR / manual | Evidence-backed security review |
+| AI · Issue Triage | gh-aw | Codex / OpenAI API | Issue opened | Labels, priority, questions |
+| AI · Issue Fixer | gh-aw | Codex / OpenAI API | Maintainer applies ai-fix | Issue → tested draft PR |
+| AI · Implement Task | gh-aw | Codex / OpenAI API | Manual task input | Requirement → tested draft PR |
+| AI · CI Investigator | gh-aw | Codex / OpenAI API | CI failure/timeout on configured branches | Diagnosis issue |
+| AI · Release Readiness | gh-aw | Codex / OpenAI API | Manual | Advisory readiness issue |
+| AI · Documentation Updater | gh-aw | Codex / OpenAI API | Manual | README correction draft PR |
 
 ## GitHub setup
 
-1. Authenticate the local CLI with `gh auth login`. The local build does not require authentication.
-2. Push `main` and the prepared demo branches to **this existing repository** (commands in [DEMO.md](DEMO.md)).
-3. In repository **Settings → Actions → General**, allow the official Actions and
-   `github/gh-aw-actions` used by the compiled workflows. Under **Workflow permissions**,
-   enable **Allow GitHub Actions to create and approve pull requests**. The checkbox is
-   needed for creation; these agents are configured never to approve or merge PRs.
-   Keep the default token read-only; explicit job permissions grant controlled writes.
-   Organization policy may need an administrator to allow these settings.
-4. In **Settings → Pages → Build and deployment → Source**, select **GitHub Actions**.
-   Review the `github-pages` environment under **Settings → Environments** and allow main.
-   The expected URL is `https://AakashPandya.github.io/github-agentic-sdlc-demo/` after
-   successful deployment; it has not been verified live during local setup.
-5. Configure Copilot authentication below. Run `npm run labels:setup` after signing in
-   to create/update the ten demo labels. No labels have been created remotely yet.
-6. Recommended: under **Settings → Rules → Rulesets**, protect main with human PR review
-   and the `Lint, test and build` status check after its first run. Avoid agent bypasses.
+Follow [ORG-SETUP.md](docs/ORG-SETUP.md) for the complete other-machine and organization
+repository setup, including transferring all local branches and configuring secrets.
 
-### Copilot authentication
+1. Put the updated sources **and generated `.lock.yml` files** on the target repository's main.
+2. Add an OpenAI Platform API key as the target repository's Actions secret **`OPENAI_API_KEY`**.
+3. Permit the pinned official actions and `github/gh-aw-actions`. Enable **Allow GitHub Actions
+   to create and approve pull requests** for PR creation; these agents never approve or merge.
+4. Run `npm run labels:setup` from a clone whose origin points to the intended repository.
+5. For deployment, choose **Settings → Pages → Source → GitHub Actions** and allow main in
+   the `github-pages` environment. Pages availability depends on your organization plan/policy.
+6. Start **AI · Security Review** manually on main as a first inference smoke test.
 
-All eight workflow sources use:
+All sources use the same explicit engine/model selection:
 
 ```yaml
-engine: copilot
+engine: codex
+model: openai/gpt-6.1-sol
 permissions:
   contents: read
-  copilot-requests: write
 ```
 
-This selects the Actions token for inference. Official docs require an organization
-Copilot subscription with centralized billing. The remote here is under `AakashPandya`; the public GitHub API identifies this owner as
-a personal (`User`) account. Plan to use the fallback below unless eligible organization
-billing is available. License and inference access cannot be verified while `gh` is signed out.
-**The recommended method is configured, but runtime access is unverified.**
+The real compiler injects `${{ secrets.CODEX_API_KEY || secrets.OPENAI_API_KEY }}` into
+Codex authentication. Configure **only OPENAI_API_KEY** for this setup. If an organization
+already exposes CODEX_API_KEY, it takes precedence; have its owner remove that repository's
+access to the conflicting secret or deliberately use that key. Never store a key in source,
+`.env` committed to Git, a `VITE_*` variable, workflow inputs, prompts or PR descriptions.
+Setting a key on your laptop does not configure GitHub Actions. See
+[gh-aw Codex authentication](https://github.github.com/gh-aw/engines/codex/) and
+[OpenAI API setup](https://developers.openai.com/api/docs/quickstart).
 
-For a personal repository or unavailable centralized billing, use the supported fallback:
+The app is unchanged by this engine migration. The API key is used by the GitHub-hosted
+workflow runner, not the browser. Repository context supplied to the model is sent to
+OpenAI; use an organization-approved API project and data policy.
 
-1. Remove only `copilot-requests: write` from all eight `.md` permission blocks.
-2. In your personal GitHub **Settings → Developer settings → Personal access tokens →
-   Fine-grained tokens**, create a token with your user account as resource owner,
-   **Account permissions → Copilot Requests: Read**, and an active Copilot license.
-3. Store it directly in repository **Settings → Secrets and variables → Actions →
-   Secrets → New repository secret**, named `COPILOT_GITHUB_TOKEN`.
-4. Run `gh aw compile`, `gh aw validate --strict`, commit the source and lock changes,
-   and push. Leave `engine: copilot` unchanged. Merge the updated main into each demo
-   branch before opening its PR, so PR-triggered workflows use the same auth configuration
-   (commands in DEMO.md).
+## CI for agent-created PRs
 
-Merely adding the fallback secret while keeping `copilot-requests: write` does not
-switch authentication: that secret is ignored for inference when the permission exists.
-Never paste tokens into issues, workflow files, chat or terminal command arguments.
-See [official authentication documentation](https://github.github.com/gh-aw/reference/auth/).
+The default GitHub Actions token normally suppresses follow-on workflow events. Optionally
+add **GH_AW_CI_TRIGGER_TOKEN**, a fine-grained GitHub PAT scoped only to this repository with
+**Contents: Read and write**. gh-aw uses it in the mutation job to add an empty commit and
+trigger PR CI. This credential is separate from the OpenAI API key.
 
-### CI on agent-created PRs
-
-PRs created using `GITHUB_TOKEN` do not normally trigger a new CI run. Optionally add
-`GH_AW_CI_TRIGGER_TOKEN` as an Actions repository secret, using a fine-grained PAT scoped
-only to this repository with **Contents: Read and write**. gh-aw uses it in the separate
-safe-output job to push an extra empty commit, generating the PR synchronization event.
-It is independent of Copilot inference authentication. No token is created by this demo.
-
-Without this optional token, code generation and PR creation still work. A human can
-review the generated branch, then explicitly start deterministic CI:
+Without it, draft PR creation still works. After inspecting the generated branch, a human
+can run:
 
 ```sh
-gh workflow run ci.yml --ref COPILOT_PR_BRANCH
+gh workflow run ci.yml --ref AGENT_PR_BRANCH
 ```
 
-Inspect the resulting run's branch and SHA. Manual dispatch is a demonstration fallback;
-confirm required-check association on the PR before merging. A human-authenticated empty
-commit on that PR branch also triggers normal PR CI. See the
-[official CI trigger guide](https://github.github.com/gh-aw/reference/triggering-ci/).
+Check the branch and SHA on that run. Required-check association must be verified before
+merge; a human-authenticated empty commit on the PR branch triggers normal PR CI too.
+See [official CI-trigger behavior](https://github.github.com/gh-aw/reference/triggering-ci/).
 
-## Agent sources and recovery
+## Editing and validating workflows
 
-Edit `.github/workflows/ai-*.md`, then compile and commit the corresponding `.lock.yml`
-files. GitHub Actions executes the generated YAML. Do not hand-edit lock files.
-This repository was compiled with **gh-aw v0.89.21** on **5 October 2026**. gh-aw remains
-preview software: recheck official docs and recompile after upgrades. Current live docs
-mention `add-labels.max-labels`, but this compiler rejects it; the compatible triage
-configuration uses `max: 1` and an explicit allowed-label list.
+Markdown is the authoring format. Actions executes the generated YAML. After editing a
+source, compile and commit both files. Do not hand-edit `.lock.yml` files.
+The checked-in locks use **gh-aw v0.89.21**, Codex CLI **0.154.0**, and the explicit model
+above. Model access, rate limits, credits and organizational policy need a real runtime check.
 
 ```sh
 gh aw version
 gh aw compile
+npm run workflows:check
 gh aw validate
 gh aw validate --strict
-gh aw doctor --repo AakashPandya/github-agentic-sdlc-demo
+gh aw doctor
 gh aw run ai-security-review --ref main
 gh aw run ai-release-readiness --ref main
 gh aw run ai-docs-updater --ref main
-gh aw run ai-implement-task --ref main --raw-field 'task=Add priority support to To-Do items.'
-gh aw logs ai-implement-task -c 1 --artifacts all
+gh aw logs ai-security-review -c 1 --artifacts all
 gh aw status
 ```
 
-`gh aw run` dispatches workflows with manual triggers; PR/issue/CI events activate their
-own agents. Logs can contain repository data; they are ignored by Git in this project.
-The compiler enforces strict mode by default, pins generated action/container references,
-and separates read-only reasoning from write-capable output handlers.
+The policy check verifies all eight engines, prompt hashes, agent permissions, generated
+secret wiring, disabled shells for readers, safe-output limits and protected-file boundaries.
+It runs in normal CI and deployment builds without an API key or gh-aw installation.
+Use the gh-aw compiler to verify all source/lock details after edits; the policy check is
+not a replacement for compilation. An intentional credential migration can produce a safe
+update warning until the reviewed new locks are committed; see the audit report.
 
-## Demo and architecture documents
+GitHub Pages uses the target repository's configured base path from `configure-pages`, so
+renaming the repository does not require a hardcoded source change. Locally the original
+base path remains the default. For a local target-path check:
 
-- [DEMO.md](DEMO.md): 10–15 minute runbook, exact priority task, branch/PR commands and recovery.
-- [DEMO-ISSUES.md](DEMO-ISSUES.md): copy-ready triage and fixer issues.
-- [Security model](docs/SECURITY-MODEL.md): permission boundaries and protected files.
-- [Workflow reference](docs/WORKFLOWS.md): each agent's trigger, reads and outputs.
-- [Validation report](docs/VALIDATION.md): actual local results and remote limitations.
+```sh
+PAGES_BASE_PATH=/your-org-repo-name/ npm run build
+```
 
-The deliberate review and CI defects live on demo branches only. Never merge those
-fixture PRs into main. The issue-fixer fixture uses a separate optional base branch so
-main can correctly reject blank tasks throughout the demonstration.
+The conventional workflows and PR bases assume **main**. Follow the setup guide if the
+organization uses a different default branch. This is prepared for GitHub.com; GitHub
+Enterprise Server compatibility is not asserted by the local checks.
+
+## Demo and audit documents
+
+- [DEMO.md](DEMO.md): customer sequence, exact task input and branch/PR commands.
+- [DEMO-ISSUES.md](DEMO-ISSUES.md): copy-ready issue bodies.
+- [Organization setup](docs/ORG-SETUP.md): move to another machine and use your API key.
+- [Workflow reference](docs/WORKFLOWS.md): triggers, tools, reads and outputs for every agent.
+- [Security model](docs/SECURITY-MODEL.md): credential boundaries and protected files.
+- [Workflow audit](docs/WORKFLOW-AUDIT.md): findings, corrections and remaining limitations.
+- [Validation](docs/VALIDATION.md): actual checks and unverified runtime conditions.
+
+Intentional defects live only on demo branches. Never merge them into main. The isolated
+issue-fix fixture allows a real bug-fixing demonstration while main stays correct.

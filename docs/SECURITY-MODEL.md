@@ -1,119 +1,125 @@
 # Security model
 
 ```text
-GitHub Copilot
-      |
-read-only repository reasoning
-      |
-      v
-Repository Context
-      |
-      v
-Structured Safe Output Request
-      |
-      v
-Separate Permission-Controlled Job
-      |
-      v
-Comment / Issue / Draft Pull Request
-      |
-      v
-Human Review
+GitHub Actions runner → OpenAI Codex → OpenAI API inference
+        |                    |
+Read-only GitHub token       OPENAI_API_KEY (Actions secret)
+        |
+Repository context → Reasoning → Structured safe-output request
+                                       |
+                              Separate mutation job
+                                       |
+                         Comment / Issue / Draft PR
+                                       |
+                                 Human review
 ```
 
-## Permissions and trust
+## Two separate credentials
 
-Every agent explicitly uses `engine: copilot`. Agent jobs receive repository read
-permissions only. `copilot-requests: write` enables inference and does not authorize
-repository writes. It requires supported organization Copilot billing; otherwise use
-the documented `COPILOT_GITHUB_TOKEN` fallback after removing that permission and
-recompiling. Generation-time coding tools are unrelated to runtime agent identity.
+The OpenAI API key authorizes model inference, not GitHub writes. The GitHub Actions token
+provides repository access according to each job's permissions. No Copilot subscription,
+Copilot token or Copilot inference permission is configured in the authored workflows.
+The generated Codex integration reads CODEX_API_KEY first, then OPENAI_API_KEY; use only
+OPENAI_API_KEY for the documented setup to avoid unexpected key precedence.
 
-Safe outputs are structured requests that separately privileged handlers validate.
-Generated `safe_outputs`, activation and conclusion jobs can have write permissions
-for their defined purposes, including status reporting and label-command removal.
-That does not grant the reasoning agent a writable repository token. Review the
-compiled YAML's individual `jobs.agent.permissions`, not just occurrences of `write`.
+Store the key in repository/organization Actions secrets. Never commit it, use a VITE_
+client variable, pass it as a manual task input, print it, or place it in a prompt. The app
+is browser-only and has no inference integration. The workflow sends selected repository
+context to OpenAI; organization data-processing approval is an external prerequisite.
+No actual key was created or inspected during this migration.
 
-Reviewers use only GitHub read tools, without shell or edit tools. Code-writing agents
-can edit a local workspace and run checks, while their tokens remain read-only.
-Repository content, PR diffs, issues and logs are untrusted evidence. Instructions
-explicitly reject scope expansion, secret disclosure and instructions found in that data.
-The default gh-aw sandbox/firewall and threat detection remain enabled. Network access
-is scoped to defaults, GitHub and Copilot; implementation/fixer agents additionally
-allow the Node ecosystem needed for npm. These controls reduce risk; neither model
-instructions nor automated analysis replace human review.
+## Agent permissions and tools
 
-PR workflows retain gh-aw's default same-repository restriction. Fork workflows are
-not enabled, and `pull_request_target` is not used. Issue triage permits reports from
-all roles, has only bounded comment/label outputs, and cannot request a code fix.
-The fixer requires a write/maintainer/admin actor to apply its label command. Public
-issue traffic may consume inference budget; use organization billing controls and
-review gh-aw's generated daily credit controls before opening a high-traffic demo.
+All authored agent permission values are read. The generated `jobs.agent.permissions`
+are also checked for repository writes by `npm run workflows:check`. Activation, safe-output
+and conclusion jobs may legitimately have narrowly scoped writes for statuses, label-command
+removal and the declared mutations. A generated job with `issues: write` is not evidence
+that the reasoning agent received that permission; inspect jobs individually.
 
-CI investigation is a privileged `workflow_run` context, so it has no code execution
-or edit tool. It reads the failed SHA and logs via GitHub read APIs and does not execute
-branch code or downloaded artifacts. Trusted branch patterns limit activation.
+The five investigation agents (PR review, security, triage, CI investigation and release
+readiness) disable shell and agent checkout. They use GitHub MCP read tools. Codex's native
+web search/fetch are disabled by generated command options. The compiler cannot enforce
+nonempty per-command Codex shell allowlists, so no such list is claimed as a boundary.
 
-## Mutation boundaries
+Issue Fixer and Implement Task can run shell commands locally for npm validation. The
+README updater can edit files locally; gh-aw v0.89.21 enables shell when edit capability is
+granted, so its source explicitly declares that fact. Its prompt disallows running project
+code, while the safe-output handler independently restricts publication to README.md.
+Prompt instructions are not equivalent to an execution sandbox.
 
-| Agent | Permitted output ceiling |
+The external gh-aw firewall/sandbox and threat detection remain enabled. The generated
+Codex CLI uses its bypass flag inside the outer sandbox; that is generated compiler behavior,
+not a disabled gh-aw firewall. Network access is limited to defaults, GitHub and Codex
+transport, plus the Node ecosystem only for the two implementation agents. Model calls and
+threat detection use OpenAI credentials. Generated provider catalogs and cleanup code may
+mention other engines; they are framework plumbing, not configured inference fallbacks.
+
+## Untrusted events and publication boundaries
+
+PR workflows keep the default same-repository restriction and do not use pull_request_target.
+Issue triage accepts reports from all roles but only has bounded label/comment outputs.
+Its allowlist excludes ai-fix. The fixer requires a write/maintainer/admin actor to apply
+that label command; removing the label after activation allows a later deliberate retry.
+
+CI investigation runs after CI failure/timeout on main, demo/** and codex/**. Its agent
+does not check out or execute the failed branch or artifacts. It reads run data and source
+at the failed SHA via APIs. Logs, issues, PR content and source comments are explicitly
+untrusted evidence. Missing logs reduce confidence rather than being fabricated.
+
+| Agent | Explicit output limits |
 |---|---|
-| PR Reviewer | 5 inline findings; 1 COMMENT/REQUEST_CHANGES review |
-| Security Review | 5 inline findings; 1 COMMENT/REQUEST_CHANGES review; 1 serious manual-scan issue |
-| Issue Triage | 1 allowed-label call; 1 comment; prompt limits selection to 3 labels |
-| Issue Fixer | 1 draft PR or explanatory comment; maximum 20 changed files / 256 KB patch |
-| Implement Task | 1 draft PR; maximum 20 changed files / 256 KB patch |
+| PR Reviewer | 5 inline comments; 1 COMMENT/REQUEST_CHANGES review |
+| Security Review | 5 inline comments; 1 review; 1 serious manual-scan issue |
+| Issue Triage | 1 allowed-label call; 1 comment; prompt selects at most 3 labels |
+| Issue Fixer | 1 draft PR or 1 explanatory comment; 20 files / 256 KB patch |
+| Implement Task | 1 draft PR; 20 files / 256 KB patch |
 | CI Investigator | 1 issue |
 | Release Readiness | 1 advisory issue |
-| Documentation Updater | 1 draft PR touching only README.md; maximum 1 file / 64 KB |
+| Documentation Updater | 1 README-only draft PR; 1 file / 64 KB patch |
 
-Triage's supported compiler schema limits calls with `max`; it does not support the
-live docs' newer `max-labels` field. The allowed set excludes `ai-fix`, preventing the
-triage model from authorizing implementation. gh-aw may independently emit framework
-failure/status reports in addition to the agent's configured domain outputs.
-
-No merge safe output exists. Review events exclude APPROVE. No agent directly deploys,
-creates releases or writes to main. Draft PRs preserve human review as the approval
-boundary. Configure a main ruleset to enforce review and required CI at the platform
-level; prompt instructions alone are not branch protection.
+Framework failure/status reports are separate from these domain-output limits. The
+installed compiler supports a maximum number of label calls, not the newer max-labels field.
+No merge output exists and review events exclude APPROVE. Configure main rulesets and required
+CI to enforce human review at the GitHub platform level. The checkbox permitting Actions to
+create and approve PRs is needed for creation; the agent configuration does not permit approval.
 
 ## Protected files
 
-Issue Fixer and Implement Task enforce `protected-files: blocked` plus an exclusive
-`allowed-files: ["src/**", "tests/**"]`. This prevents committing `.github/**`, agent
-instructions, manifests, lockfiles, README or any other path outside that list.
-A model's local edit attempt is not the same as permission to publish that edit: the
-safe-output handler rejects out-of-policy patches.
+Fixer and Implement Task use an exclusive allowlist `[src/**, tests/**]` with
+`protected-files: blocked`. The handler rejects out-of-scope patches, including .github/**,
+manifests, dependency locks, scripts, configuration and agent instructions. This protects the
+published diff; it is not a claim that a local process cannot attempt other filesystem edits.
 
-Documentation Updater allows exactly `README.md` and uses:
+The README updater allows exactly README.md and uses a narrow exception:
 
 ```yaml
+allowed-files: [README.md]
 protected-files:
   policy: blocked
   exclude: [README.md]
-allowed-files: [README.md]
 ```
 
-This narrow exception leaves all other protections intact. The default general gh-aw
-policy may request review for protected files; this repository deliberately hard-blocks
-them instead. See [official PR safe-output policies](https://github.github.com/gh-aw/reference/safe-outputs-pull-requests/).
+All other protected files remain blocked. Generated handler configuration is checked against
+these policies. PR creation failure does not silently create an issue containing a patch:
+`fallback-as-issue: false` is explicit on all three PR writers.
 
-## Demo isolation and data
+## Demo isolation, CI and remaining risks
 
-Main renders plain text and rejects blank titles. `demo/pr-review` intentionally has
-unsafe rendering and semantic defects; `demo/ci-failure` has one controlled test failure.
-`demo/issue-fix` contains only the blank-creation fixture and missing regression cases.
-None should be merged into main or deployed. The maintainer-owned `DEMO_ISSUE_FIX_BASE`
-variable can select only the fixed fixture name; otherwise the fixer uses main. Issue
-text cannot widen that checkout/base selection. Remove the variable after rehearsal.
+Main stays correct. demo/pr-review contains intentional semantic/security defects;
+demo/ci-failure has a controlled failing assertion. demo/issue-fix is an isolated blank-title
+regression selected only by a maintainer-owned variable. Issue text cannot choose an arbitrary
+base branch. Never merge those fixture branches into main; remove the variable after use.
 
-Task data is browser-local and unencrypted. It is not a secret store, and another tab's
-changes are not synchronized. Invalid stored data is not automatically overwritten.
-No secrets are embedded in source. Do not include real customer information in demo
-issues/tasks; generated reports and logs may preserve it.
+The optional GH_AW_CI_TRIGGER_TOKEN is a separate GitHub credential, restricted to this repo
+with Contents write, used only by mutation jobs to trigger follow-on CI. Without it use
+human-dispatched CI and check the exact SHA. Neither that PAT nor the OpenAI key makes an
+agent's output trustworthy by itself.
 
-The optional CI trigger PAT is confined to the generated mutation stage, scoped to this
-repository with Contents write, and is unrelated to Copilot billing. Without it, use
-human-dispatched CI and check the exact PR SHA before review/merge. See the
-[official CI trigger documentation](https://github.github.com/gh-aw/reference/triggering-ci/).
+The policy check is an authored safety contract, not a formal proof of generated runtime
+code. Keep compiler/action/container pins reviewed; validate again after upgrades. Inference
+can consume API credit and return incorrect results. All outcomes still need human review.
+Task data is unencrypted browser storage; do not store secrets or customer-sensitive data.
+
+References: [Codex integration](https://github.github.com/gh-aw/engines/codex/),
+[protected files](https://github.github.com/gh-aw/reference/safe-outputs-pull-requests/),
+[API credentials](https://developers.openai.com/api/reference/overview).

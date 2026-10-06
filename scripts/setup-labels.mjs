@@ -10,7 +10,7 @@ const labels = [
   ['priority-high', 'b60205', 'High impact or blocking'],
   ['priority-medium', 'e99695', 'Normal priority'],
   ['priority-low', 'c5def5', 'Low urgency'],
-  ['ai-fix', '7057ff', 'Request a Copilot fix through a pull request'],
+  ['ai-fix', '7057ff', 'Request a Codex fix through a pull request'],
 ]
 execFileSync('gh', ['auth', 'status'], { stdio: 'inherit' })
 for (const [name, color, description] of labels) {

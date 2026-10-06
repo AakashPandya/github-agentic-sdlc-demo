@@ -1,14 +1,14 @@
 # Customer demo: To-Do App CI/CD with gh-aw Agents
 
-Target duration: **13–15 minutes**. Runtime AI engine throughout: **GitHub Copilot**.
+Target duration: **13–15 minutes**. Runtime engine: **OpenAI Codex**; inference uses **OpenAI API / gpt-6.1-sol**.
 Agent runs are asynchronous and can take longer than the speaking slot. Run a rehearsal
 and prepare completed examples beforehand; show live dispatch and the prepared result
 side by side. Never present a prepared result as a newly completed run.
 
 ## Before the customer arrives
 
-Complete [README setup](README.md#github-setup), including Copilot access and GitHub Pages.
-If you changed Copilot authentication or other workflow configuration after creating the
+Complete [README setup](README.md#github-setup), including OpenAI API access and GitHub Pages.
+If you changed Codex authentication or other workflow configuration after creating the
 fixtures, commit those changes on main and synchronize them first:
 
 ```sh
@@ -28,11 +28,12 @@ gh auth login
 git push origin main
 git push origin demo/pr-review demo/ci-failure demo/issue-fix
 npm run labels:setup
-gh aw doctor --repo AakashPandya/github-agentic-sdlc-demo
+gh aw doctor
 gh aw status
 ```
 
-No remote push or PR creation was performed during the unauthenticated local build.
+The migration does not publish to your organization repository. Verify the destination
+remote and follow ORG-SETUP.md before executing these push commands.
 Wait for main's CI and Deploy to finish. Open the Pages URL from Deploy's environment.
 Open the app, Actions, Issues, Pull requests and these source files in browser tabs:
 `ci.yml`, `deploy.yml`, `ai-pr-review.md`, `ai-implement-task.md`.
@@ -77,9 +78,9 @@ Traditional CI answers: **“Did these predefined checks pass?”**
 ## Demo 3 — PR Review (2 minutes)
 
 Open “Improve task editing and display” and show green CI. Open `ai-pr-review.md` and
-point at **engine: copilot**, read permissions, and the two bounded review safe outputs.
+point at **engine: codex**, **model: openai/gpt-6.1-sol**, read permissions, and the two bounded review safe outputs.
 
-Say: **“This is different. We're giving GitHub Copilot an engineering objective and
+Say: **“This is different. We're giving OpenAI Codex an engineering objective and
 repository context rather than a predefined sequence of analysis commands.”**
 
 Show the actual review: Problem, Impact, Recommended Fix; then Risk, Critical Findings,
@@ -109,9 +110,9 @@ produce one issue. Automatic PR runs deliver review feedback on the triggering P
 ## Demo 5 — Issue Triage (1 minute)
 
 Create one prepared issue from [DEMO-ISSUES.md](DEMO-ISSUES.md). For the quickest clear
-example use “Todo does not work” with body “The todo feature is broken.” Show Copilot
+example use “Todo does not work” with body “The todo feature is broken.” Show Codex
 asking for browser, steps, expected and actual behavior, then applying `needs-info` and
-an estimated priority. Explain that classification and priority are Copilot decisions.
+an estimated priority. Explain that classification and priority are Codex decisions.
 Show a prepared bug/enhancement result if available. The agent searches for duplicates
 but does not close legitimate issues.
 
@@ -132,11 +133,11 @@ variable**, name `DEMO_ISSUE_FIX_BASE`, value `demo/issue-fix`.
 2. On the issue's right sidebar choose **Labels → ai-fix** using a write/maintainer account.
 3. Show **AI · Issue Fixer** in Actions. The label is automatically removed so a human
    can apply it again later. Do not repeatedly reapply while a run is active.
-4. Show Copilot inspecting the issue, restoring trim-before-validation, adding empty,
+4. Show Codex inspecting the issue, restoring trim-before-validation, adding empty,
    whitespace-only and valid-title regression tests, and producing a draft PR.
 5. Verify the PR's base is **demo/issue-fix**. Review the diff and real test results.
    Do not merge any fixture into main. If the optional CI token is absent, inspect the
-   generated branch and run `gh workflow run ci.yml --ref COPILOT_PR_BRANCH`.
+   generated branch and run `gh workflow run ci.yml --ref AGENT_PR_BRANCH`.
 6. After the run finishes, reset the demo override:
 
 ```sh
@@ -185,10 +186,10 @@ Requirements:
 
 Show the draft PR's requirement, implementation summary, files changed, tests and actual
 validation. Check that pre-existing saved tasks get a sensible Medium default. Point out
-that the original app intentionally has no priority support: this change is Copilot's
+that the original app intentionally has no priority support: this change is Codex's
 runtime work. Run CI explicitly if the optional CI trigger token is absent.
 
-Say: **“The human defines the outcome. Copilot reasons about how that outcome should be
+Say: **“The human defines the outcome. Codex reasons about how that outcome should be
 implemented. The result still goes through the normal pull-request and CI process.”**
 
 ## Demo 8 — CI Investigation (1–2 minutes)
@@ -198,15 +199,14 @@ one for a list containing one active and one completed task. Exactly one asserti
 Show **AI · CI Investigator** and its issue: Failed Stage, Likely Root Cause, Evidence,
 Recommended Fix, Confidence. Compare the diagnosis with the failing assertion and SHA.
 
-Say: **“Traditional CI detects that something failed. GitHub Copilot investigates why it failed.”**
+Say: **“Traditional CI detects that something failed. OpenAI Codex investigates why it failed.”**
 
-The investigator accepts CI failures/timeouts on main and `demo/**`, `copilot/**`,
-`codex/**` branches; it only reads source and logs through GitHub tools. Cancelled runs
+The investigator accepts CI failures/timeouts on main and `demo/**`, `codex/**` branches; it only reads source and logs through GitHub tools. Cancelled runs
 are excluded. Add another trusted branch pattern in source and recompile if needed.
 
 ## Finish (30 seconds)
 
-**“GitHub Actions executes deterministic automation. GitHub Copilot performs reasoning.
+**“GitHub Actions executes deterministic automation. OpenAI Codex performs reasoning.
 gh-aw connects those capabilities with controlled permissions, safe outputs and standard
 GitHub workflows.”**
 
@@ -218,6 +218,7 @@ Readiness never deploys; current documentation should produce noop rather than c
 ```sh
 # After changing any agent Markdown source:
 gh aw compile
+npm run workflows:check
 gh aw validate
 gh aw validate --strict
 
@@ -231,13 +232,14 @@ gh aw status
 gh aw logs ai-pr-review -c 1 --artifacts all
 gh aw logs ai-issue-fixer -c 1 --artifacts all
 gh aw logs ai-ci-investigator -c 1 --artifacts all
-gh aw doctor --repo AakashPandya/github-agentic-sdlc-demo
+gh aw doctor
 ```
 
-For missing Copilot access, follow the README's fallback carefully: remove the permission,
-configure `COPILOT_GITHUB_TOKEN` in GitHub UI and recompile; a token alone is insufficient
-while the permission remains. Never switch engines. If Pages fails, confirm Source is
-GitHub Actions, environment permits main, and organization policy permits Pages.
+For missing OpenAI access, follow [ORG-SETUP.md](docs/ORG-SETUP.md): configure the target
+repository's OPENAI_API_KEY secret and verify API billing/model access. A ChatGPT or
+Copilot login on your laptop does not configure this integration. No secret value should
+appear in source or workflow input. If Pages fails, confirm its source is GitHub Actions,
+the environment permits main, and organization policy permits Pages.
 
 Close the intentional demo PRs without merging and close demonstration issues after
 showing the result. Remove `DEMO_ISSUE_FIX_BASE` once the fixer has finished. Keep local

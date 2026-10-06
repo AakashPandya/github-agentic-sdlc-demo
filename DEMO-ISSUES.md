@@ -1,7 +1,7 @@
 # Copy-ready demo issues
 
 Create these with your human GitHub account after pushing the workflows to main.
-Expected labels are demonstration expectations, not deterministic guarantees: Copilot
+Expected labels are demonstration expectations, not deterministic guarantees: Codex
 must assess the actual evidence. The triage agent never applies `ai-fix` by itself.
 
 ## Bug
@@ -29,7 +29,7 @@ identify any browser storage settings or additional details needed to reproduce 
 ```
 
 Expected: `bug`, `priority-medium`. This is a sample report, not a confirmed main bug.
-Copilot may ask for more evidence after inspecting the implementation.
+Codex may ask for more evidence after inspecting the implementation.
 
 ## Enhancement
 
@@ -45,7 +45,7 @@ continue to work. Overdue tasks could have a clear text indicator as well as col
 This would help me plan weekly work. It is useful but does not block today's demo.
 ```
 
-Expected: `enhancement`; priority is Copilot's decision (likely low/medium).
+Expected: `enhancement`; priority is Codex's decision (likely low/medium).
 
 ## Incomplete report
 
@@ -84,6 +84,6 @@ Use this exact text only while the documented `demo/issue-fix` fixture is select
 The issue describes that fixture, not main. Follow [DEMO.md](DEMO.md#demo-6--issue--fix--pr-2-minutes)
 to set `DEMO_ISSUE_FIX_BASE=demo/issue-fix`, create this issue, then apply **ai-fix**
 as a maintainer/write user. That label is a one-shot command and is removed automatically
-by gh-aw. Copilot should create a draft PR against `demo/issue-fix`. Remove the repository
+by gh-aw. Codex should create a draft PR against `demo/issue-fix`. Remove the repository
 variable after the demo. With no variable, the fixer targets main and should accurately
 report that this particular bug is already fixed.
